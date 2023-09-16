@@ -202,6 +202,14 @@ idea {
     }
 }
 
+dependencies {
+    if (includeCommonDevEnvMods.toBoolean()) {
+        implementation rfg.deobf('curse.maven:jei-238222:4538010')
+        //noinspection DependencyNotationArgument
+        implementation rfg.deobf('curse.maven:top-245211:2667280') // TOP 1.4.28
+    }
+}
+
 tasks.named("processIdeaSettings").configure {
     dependsOn("injectTags")
 }
