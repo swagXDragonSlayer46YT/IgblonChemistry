@@ -1,6 +1,5 @@
-package igblonchemistry.client;
+package igblonchemistry.proxy;
 
-import igblonchemistry.common.CommonProxy;
 import igblonchemistry.common.blocks.Machines;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.item.Item;
@@ -10,6 +9,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
+import igblonchemistry.proxy.CommonProxy;
 
 @Mod.EventBusSubscriber(Side.CLIENT)
 public class ClientProxy extends CommonProxy {

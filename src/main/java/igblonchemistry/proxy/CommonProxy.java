@@ -1,6 +1,7 @@
-package igblonchemistry.common;
+package igblonchemistry.proxy;
 
 import igblonchemistry.IgblonChemistry;
+import igblonchemistry.common.GuiHandler;
 import igblonchemistry.common.blocks.ChemicalReactor;
 import igblonchemistry.common.blocks.Machines;
 import igblonchemistry.common.blocks.TileChemicalReactor;
