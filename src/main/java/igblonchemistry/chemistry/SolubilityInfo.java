@@ -16,4 +16,8 @@ public class SolubilityInfo {
     public double calculateSolubility(double temperature) {
         return 0;
     }
+
+    public Compound getSolvent() {
+        return solvent;
+    }
 }

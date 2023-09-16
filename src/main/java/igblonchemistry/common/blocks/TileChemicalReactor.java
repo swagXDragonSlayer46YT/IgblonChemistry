@@ -1,5 +1,6 @@
 package igblonchemistry.common.blocks;
 
+import igblonchemistry.chemistry.Mixture;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
@@ -14,9 +15,12 @@ public class TileChemicalReactor extends TileEntity implements ITickable {
 
     public static final int SIZE = 2;
 
+    private Mixture[] contents;
     @Override
     public void update() {
-
+        if (!world.isRemote) {
+            //TODO: go through each mixture stored in the reactor and make them interact with each other, like "alloying"
+        }
     }
 
     private ItemStackHandler inputHandler = new ItemStackHandler(SIZE) {
