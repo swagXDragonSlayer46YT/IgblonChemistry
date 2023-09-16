@@ -1,6 +1,9 @@
 package igblonchemistry;
 
 import igblonchemistry.common.CommonProxy;
+import igblonchemistry.common.blocks.Machines;
+import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLConstructionEvent;
@@ -48,4 +51,11 @@ public class IgblonChemistry {
     public void serverInit(FMLServerStartingEvent event) {
 
     }
+
+    public static CreativeTabs creativeTab = new CreativeTabs("Chemistry") {
+        @Override
+        public ItemStack createIcon() {
+            return new ItemStack(Machines.chemicalReactor);
+        }
+    };
 }

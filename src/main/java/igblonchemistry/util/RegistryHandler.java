@@ -1,6 +1,8 @@
 package igblonchemistry.util;
 
+import igblonchemistry.common.blocks.Machines;
 import igblonchemistry.common.items.Items;
+import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.event.RegistryEvent;
@@ -15,6 +17,12 @@ public class RegistryHandler
     public static void onItemRegister(RegistryEvent.Register<Item> event)
     {
         event.getRegistry().registerAll(Items.ITEMS.toArray(new Item[0]));
+    }
+
+    @SubscribeEvent
+    public static void onBlockRegister(RegistryEvent.Register<Block> event)
+    {
+        event.getRegistry().registerAll(Machines.BLOCKS.toArray(new Block[0]));
     }
 
     @SubscribeEvent
