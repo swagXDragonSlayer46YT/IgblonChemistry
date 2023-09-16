@@ -12,22 +12,20 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 
 @Mod.EventBusSubscriber
 public class CommonProxy {
 
-    @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
 
     }
 
-    @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
-
+        NetworkRegistry.INSTANCE.registerGuiHandler(IgblonChemistry.instance, new GuiHandler());
     }
 
-    @Mod.EventHandler
     public void postInit(FMLInitializationEvent event) {
 
     }

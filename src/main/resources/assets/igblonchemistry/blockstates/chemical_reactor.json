@@ -3,6 +3,7 @@
   "defaults": {
     "model": "cube",
     "textures": {
+      "particle": "igblonchemistry:blocks/machines/chemical_reactor/top",
       "north": "igblonchemistry:blocks/machines/chemical_reactor/front",
       "south": "igblonchemistry:blocks/machines/chemical_reactor/back",
       "west": "igblonchemistry:blocks/machines/chemical_reactor/side",

@@ -11,11 +11,13 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -26,6 +28,8 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import javax.annotation.Nullable;
 
 public class ChemicalReactor extends Block implements ITileEntityProvider {
+
+    public static final int GUI_ID = 1;
 
     public static final PropertyDirection FACING = PropertyDirection.create("facing");
 
@@ -88,9 +92,23 @@ public class ChemicalReactor extends Block implements ITileEntityProvider {
         return state.getValue(FACING).getIndex();
     }
 
-    @Nullable
     @Override
     public TileEntity createNewTileEntity(World worldIn, int meta) {
         return new TileChemicalReactor();
+    }
+
+    @Override
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
+        if (worldIn.isRemote) {
+            return true;
+        }
+
+        TileEntity tileEntity = worldIn.getTileEntity(pos);
+        if (!(tileEntity instanceof TileChemicalReactor)) {
+            return false;
+        }
+
+        playerIn.openGui(IgblonChemistry.instance, GUI_ID, worldIn, pos.getX(), pos.getY(), pos.getZ());
+        return true;
     }
 }

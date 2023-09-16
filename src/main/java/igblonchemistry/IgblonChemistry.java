@@ -43,16 +43,17 @@ public class IgblonChemistry {
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
         logger = event.getModLog();
+        proxy.preInit(event);
     }
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
-
+        proxy.init(event);
     }
 
     @Mod.EventHandler
     public void postInit(FMLInitializationEvent event) {
-
+        proxy.postInit(event);
     }
 
     @Mod.EventHandler
