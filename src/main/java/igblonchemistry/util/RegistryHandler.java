@@ -20,12 +20,6 @@ public class RegistryHandler
     }
 
     @SubscribeEvent
-    public static void onBlockRegister(RegistryEvent.Register<Block> event)
-    {
-        event.getRegistry().registerAll(Machines.BLOCKS.toArray(new Block[0]));
-    }
-
-    @SubscribeEvent
     public static void onModelRegister(ModelRegistryEvent event)
     {
         for(Item item : Items.ITEMS)

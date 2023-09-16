@@ -1,8 +1,9 @@
 package igblonchemistry.common;
 
+import igblonchemistry.IgblonChemistry;
 import igblonchemistry.common.blocks.ChemicalReactor;
 import igblonchemistry.common.blocks.Machines;
-import igblonchemistry.common.items.Items;
+import igblonchemistry.common.blocks.TileChemicalReactor;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
@@ -11,8 +12,9 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.registries.IForgeRegistry;
+import net.minecraftforge.fml.common.registry.GameRegistry;
 
+@Mod.EventBusSubscriber
 public class CommonProxy {
 
     @Mod.EventHandler
@@ -31,13 +33,14 @@ public class CommonProxy {
     }
 
     @SubscribeEvent
-    public static void registerItems(RegistryEvent.Register<Item> event) {
-        event.getRegistry().register(new ItemBlock(Machines.chemicalReactor).setRegistryName(ChemicalReactor.CHEMICAL_REACTOR));
+    public static void registerBlocks(RegistryEvent.Register<Block> event) {
+        event.getRegistry().register(new ChemicalReactor());
+        GameRegistry.registerTileEntity(TileChemicalReactor.class, IgblonChemistry.MODID + "_chemical_reactor");
     }
 
     @SubscribeEvent
-    public static void registerBlocks(RegistryEvent.Register<Block> event) {
-        event.getRegistry().register(new ChemicalReactor());
+    public static void registerItems(RegistryEvent.Register<Item> event) {
+        event.getRegistry().register(new ItemBlock(Machines.chemicalReactor).setRegistryName(Machines.chemicalReactor.CHEMICAL_REACTOR));
     }
 
     public void registerItemRenderer(Item item, int meta, String id) {

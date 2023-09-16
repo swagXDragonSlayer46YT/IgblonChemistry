@@ -8,7 +8,7 @@ import igblonchemistry.IgblonChemistry;
 public class ChemistryItem extends Item implements HasModel {
 
     public ChemistryItem(String name) {
-        setCreativeTab(CreativeTabs.DECORATIONS);
+        setCreativeTab(IgblonChemistry.creativeTab);
         setRegistryName(name);
         setTranslationKey(name);
 

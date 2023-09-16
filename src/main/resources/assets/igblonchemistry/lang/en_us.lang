@@ -1,2 +1,5 @@
 item.salt.name=Salt
-igblonchemistry.chemical_reactor=Chemical Reactor
+
+tile.igblonchemistry.chemical_reactor.name=Chemical Reactor
+
+itemGroup.Chemistry=Chemistry
