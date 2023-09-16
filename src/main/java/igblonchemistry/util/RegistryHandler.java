@@ -1,8 +1,6 @@
 package igblonchemistry.util;
 
-import igblonchemistry.common.blocks.Machines;
 import igblonchemistry.common.items.Items;
-import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.event.RegistryEvent;

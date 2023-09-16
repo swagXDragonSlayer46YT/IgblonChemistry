@@ -3,7 +3,7 @@ package igblonchemistry.proxy;
 import igblonchemistry.IgblonChemistry;
 import igblonchemistry.common.GuiHandler;
 import igblonchemistry.common.blocks.ChemicalReactor;
-import igblonchemistry.common.blocks.Machines;
+import igblonchemistry.common.blocks.Blocks;
 import igblonchemistry.common.blocks.TileChemicalReactor;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
@@ -39,7 +39,7 @@ public class CommonProxy {
 
     @SubscribeEvent
     public static void registerItems(RegistryEvent.Register<Item> event) {
-        event.getRegistry().register(new ItemBlock(Machines.chemicalReactor).setRegistryName(Machines.chemicalReactor.CHEMICAL_REACTOR));
+        event.getRegistry().register(new ItemBlock(Blocks.chemicalReactor).setRegistryName(Blocks.chemicalReactor.CHEMICAL_REACTOR));
     }
 
     public void registerItemRenderer(Item item, int meta, String id) {

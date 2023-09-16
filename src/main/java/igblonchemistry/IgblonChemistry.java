@@ -1,7 +1,7 @@
 package igblonchemistry;
 
 import igblonchemistry.proxy.CommonProxy;
-import igblonchemistry.common.blocks.Machines;
+import igblonchemistry.common.blocks.Blocks;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.common.Mod;
@@ -28,7 +28,7 @@ public class IgblonChemistry {
     public static CreativeTabs creativeTab = new CreativeTabs("Chemistry") {
         @Override
         public ItemStack createIcon() {
-            return new ItemStack(Machines.chemicalReactor);
+            return new ItemStack(Blocks.chemicalReactor);
         }
     };
 

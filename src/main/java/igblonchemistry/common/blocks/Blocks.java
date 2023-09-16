@@ -9,7 +9,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Machines {
+public class Blocks {
 
     public static final List<Block> BLOCKS = new ArrayList<Block>();
 
