@@ -1,23 +1,12 @@
 package igblonchemistry.chemistry;
 
-public class SolubilityInfo {
+@FunctionalInterface
+interface SolubilityInfo {
     //SOLUBILITIES TAKEN FROM: https://en.wikipedia.org/wiki/Solubility_table
-
-    private Compound solvent;
-
-    public SolubilityInfo(Compound solvent) {
-        this.solvent = solvent;
-    }
 
     //Measured in grams per 1 liter.
     //Meant to be overridden for each new solubility info.
     //Temperature is measured in Kelvin.
     //Pressure is assumed to be 1 atmosphere.
-    public double calculateSolubility(double temperature) {
-        return 0;
-    }
-
-    public Compound getSolvent() {
-        return solvent;
-    }
+    double calculateSolubility(double temperature);
 }

@@ -10,6 +10,13 @@ public class Compound implements Comparable<Compound> {
 
     private String name;
     private double boilingPoint;
+    private int color;
+
+    //measured in grams/liter
+    private double density;
+
+    //measured in grams
+    private double molarMass;
 
     //measured in Joules/mol
     private double heatOfVaporization = -1;
@@ -20,8 +27,8 @@ public class Compound implements Comparable<Compound> {
         this.name = name;
     }
 
-    public Compound addSolubilityInfo(SolubilityInfo solubilityInfo) {
-        this.solubilityInfos.put(solubilityInfo.getSolvent(), solubilityInfo);
+    public Compound addSolubilityInfo(Compound compound, SolubilityInfo solubilityInfo) {
+        solubilityInfos.put(compound, solubilityInfo);
         return this;
     }
 
@@ -61,6 +68,15 @@ public class Compound implements Comparable<Compound> {
         }
     }
 
+    public int getColor() {
+        return color;
+    }
+
+    public Compound setColor(int color) {
+        this.color = color;
+        return this;
+    }
+
     public Compound setHeatOfVaporization(double heatOfVaporization) {
         this.heatOfVaporization = heatOfVaporization;
         return this;
@@ -68,5 +84,23 @@ public class Compound implements Comparable<Compound> {
 
     public double getHeatOfVaporization() {
         return heatOfVaporization;
+    }
+
+    public Compound setMolarMass(double molarMass) {
+        this.molarMass = molarMass;
+        return this;
+    }
+
+    public double getMolarMass() {
+        return this.molarMass;
+    }
+
+    public Compound setDensity(double density) {
+        this.density = density;
+        return this;
+    }
+
+    public double getDensity() {
+        return this.density;
     }
 }

@@ -1,6 +1,9 @@
 package igblonchemistry.common.blocks;
 
+import com.google.common.collect.Lists;
 import igblonchemistry.IgblonChemistry;
+import igblonchemistry.chemistry.Mixture;
+import igblonchemistry.client.renderer.Textures;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -11,25 +14,27 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
 import org.lwjgl.opengl.GL11;
 
-import java.awt.*;
+import java.util.ArrayList;
 
 public class GuiChemicalReactor extends GuiContainer {
 
-    protected Rectangle fluidBar = new Rectangle(98, 23, 16, 47);
-
     protected static Minecraft mc = Minecraft.getMinecraft();
+
+    protected final TileChemicalReactor chemicalReactor;
 
     public static final int WIDTH = 180;
     public static final int HEIGHT = 152;
 
     private static final ResourceLocation background = new ResourceLocation(IgblonChemistry.MODID, "textures/gui/chemical_reactor.png");
+
     public GuiChemicalReactor(TileChemicalReactor tileEntity, ContainerChemicalReactor container) {
         super(container);
+
+        this.chemicalReactor = tileEntity;
 
         xSize = WIDTH;
         ySize = HEIGHT;
@@ -114,15 +119,18 @@ public class GuiChemicalReactor extends GuiContainer {
         GlStateManager.color(r, g, b, 255.0F);
     }
 
-    public static void renderTiledFluid(int x, int y, int width, int height, float depth, FluidStack fluidStack) {
+    public static void renderTiledFluid(int x, int y, int width, int height, float depth, FluidStack fluidStack, ArrayList<Mixture> contents) {
         TextureAtlasSprite fluidSprite = mc.getTextureMapBlocks().getAtlasSprite(fluidStack.getFluid().getStill(fluidStack).toString());
         setColorRGB(0xfcba03);
-        renderTiledTexture(x, y, width, height, depth, fluidSprite, fluidStack.getFluid().isGaseous(fluidStack));
+
+        for (int i = 0; i < contents.size(); i++) {
+            renderTiledTexture(x, y, width, height, depth, fluidSprite, fluidStack.getFluid().isGaseous(fluidStack));
+        }
     }
 
-    public static void drawGuiTank(int x, int y, int w, int height, float zLevel) {
+    public static void drawGuiTank(int x, int y, int w, int height, float zLevel, ArrayList<Mixture> contents) {
         FluidStack liquid = FluidRegistry.getFluidStack("water", 100);
-        renderTiledFluid(x, y + w - 10, w, 10, zLevel, liquid);
+        renderTiledFluid(x, y, w, 5, zLevel, liquid, contents);
         setColorRGB(0xffffff);
     }
 
@@ -130,7 +138,7 @@ public class GuiChemicalReactor extends GuiContainer {
     protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
         mc.getTextureManager().bindTexture(background);
         drawTexturedModalRect(guiLeft, guiTop, 0, 0, xSize, ySize);
-        drawGuiTank(50,  50, 52, 256, this.zLevel);
+        drawGuiTank(206,  106, 63, 256, this.zLevel, this.chemicalReactor.getContents());
     }
 
     @Override
@@ -138,5 +146,22 @@ public class GuiChemicalReactor extends GuiContainer {
         drawDefaultBackground();
         super.drawScreen(mouseX, mouseY, partialTicks);
         renderHoveredToolTip(mouseX, mouseY);
+
+        ArrayList<String> text = Lists.newArrayList();
+        text.add("gadfgashasf");
+        this.drawHoveringText(text, mouseX, mouseY);
     }
+
+    /*
+    @Override
+    protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
+        super.drawGuiContainerForegroundLayer(mouseX, mouseY);
+
+        mouseX -= guiLeft;
+        mouseY -= guiTop;
+
+
+    }
+
+     */
 }

@@ -9,14 +9,15 @@ public class Compounds {
 
     public static void register() {
         Water = new Compound("water")
-                .setHeatOfVaporization(40650);
+                .setHeatOfVaporization(40650)
+                .setColor(0x2d6ce0)
+                .setDensity(1000)
+                .setMolarMass(18.01);
 
-        //TODO: USE LAMBDA FUNCTIONS LATER ON
         Salt = new Compound("salt")
-                .addSolubilityInfo(new SolubilityInfo(Water) {
-                    public double calculateSolubility(double temperature) {
-                        return 356.5 + 0.0035 * Math.pow(temperature - 273, 2);
-                    }
-                });
+                .addSolubilityInfo(Water, temperature -> 356.5 + 0.0035 * Math.pow(temperature - 273, 2))
+                .setDensity(2160)
+                .setMolarMass(58.44)
+                .setColor(0xffffff);
     }
 }

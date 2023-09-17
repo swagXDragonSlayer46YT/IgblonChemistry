@@ -11,11 +11,13 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 import net.minecraftforge.items.wrapper.CombinedInvWrapper;
 
+import java.util.ArrayList;
+
 public class TileChemicalReactor extends TileEntity implements ITickable {
 
     public static final int SIZE = 2;
 
-    private Mixture[] contents;
+    private ArrayList<Mixture> contents = new ArrayList<Mixture>();
 
     @Override
     public void update() {
@@ -25,7 +27,6 @@ public class TileChemicalReactor extends TileEntity implements ITickable {
             //TODO: go through each mixture stored in the reactor and make them interact with each other, like "alloying"
         }
     }
-
 
     private ItemStackHandler inputHandler = new ItemStackHandler(SIZE) {
         @Override
@@ -86,5 +87,9 @@ public class TileChemicalReactor extends TileEntity implements ITickable {
             }
         }
         return super.getCapability(capability, facing);
+    }
+
+    public ArrayList<Mixture> getContents() {
+        return contents;
     }
 }
