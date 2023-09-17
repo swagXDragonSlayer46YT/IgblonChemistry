@@ -19,6 +19,8 @@ public class Compound implements Comparable<Compound> {
     //measured in grams
     private double molarMass;
 
+    private double pH;
+
     //measured in Joules/mol
     private double heatOfVaporization = -1;
 
@@ -115,5 +117,14 @@ public class Compound implements Comparable<Compound> {
 
     public double getDensity() {
         return this.density;
+    }
+
+    public Compound setPH(double pH) {
+        this.pH = pH;
+        return this;
+    }
+
+    public double getPH() {
+        return this.pH;
     }
 }

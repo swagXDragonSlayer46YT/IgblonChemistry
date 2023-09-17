@@ -62,12 +62,25 @@ public class Mixture {
         }
     }
 
-    //Measured in Liters
-    public double getTotalVolume() {
-        double totalVolume = 0;
+    public double[] getIndividualVolumes() {
+        double[] volumes = new double[components.size()];
+        int i = 0;
 
         for (Map.Entry<Compound, Double> entry : components.entrySet()) {
-            totalVolume += entry.getValue() * entry.getKey().getMolarMass() / entry.getKey().getDensity();
+            volumes[i] = entry.getValue() * entry.getKey().getMolarMass() / entry.getKey().getDensity();
+            i++;
+        }
+
+        return volumes;
+    }
+
+    //Measured in Liters
+    public double getTotalVolume() {
+        double[] volumes = getIndividualVolumes();
+        double totalVolume = 0;
+
+        for (double a : volumes) {
+            totalVolume += a;
         }
 
         return totalVolume;

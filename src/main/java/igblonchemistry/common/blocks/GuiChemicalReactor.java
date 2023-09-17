@@ -2,8 +2,10 @@ package igblonchemistry.common.blocks;
 
 import com.google.common.collect.Lists;
 import igblonchemistry.IgblonChemistry;
+import igblonchemistry.chemistry.Compound;
 import igblonchemistry.chemistry.Mixture;
 import igblonchemistry.client.renderer.Textures;
+import igblonchemistry.util.IgblonUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -21,6 +23,8 @@ import org.lwjgl.opengl.GL11;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class GuiChemicalReactor extends GuiContainer {
 
@@ -168,7 +172,7 @@ public class GuiChemicalReactor extends GuiContainer {
         int[] heights = calcMixtureHeights(chemicalReactor.getContents());
 
         for(int i = 0; i < heights.length; i++) {
-            if(y < heights[i]) {
+            if(y > heights[i]) {
                 return chemicalReactor.getContents().get(i);
             }
             y -= heights[i];
@@ -178,11 +182,31 @@ public class GuiChemicalReactor extends GuiContainer {
     }
 
     public void getReactorTooltip(int mouseX, int mouseY) {
+        if (mouseX < 206 || mouseX > 269 || mouseY > 109) {
+            return;
+        }
+
         Mixture mixture = getMixtureHovered(this.chemicalReactor, mouseY);
 
         if (mixture != null) {
             ArrayList<String> text = Lists.newArrayList();
-            text.add(TextFormatting.GOLD + "f");
+
+            text.add(TextFormatting.GOLD + "" + TextFormatting.UNDERLINE + "Liquid");
+            text.add(TextFormatting.RESET + "Total Volume: " + TextFormatting.AQUA + IgblonUtils.roundToDigit(mixture.getTotalVolume(), 0) + " Liters");
+            text.add(TextFormatting.WHITE + "pH: " + TextFormatting.GREEN + "7 pH");
+            text.add(TextFormatting.WHITE + "Temperature: " + TextFormatting.RED + "273 Kelvin");
+            text.add("");
+            text.add(TextFormatting.GOLD + "" + TextFormatting.UNDERLINE + "Components");
+
+            HashMap<Compound, Double> components = mixture.getComponents();
+            double[] individualVolumes = mixture.getIndividualVolumes();
+            int i = 0;
+
+            for (Map.Entry<Compound, Double> entry : components.entrySet()) {
+                text.add(TextFormatting.RESET + entry.getKey().getName() + ": " + TextFormatting.GRAY + IgblonUtils.roundToDigit(entry.getValue(), 2) + " mol " + TextFormatting.DARK_GRAY + "(" + IgblonUtils.roundToDigit(individualVolumes[i], 0) + " Liters)");
+                i++;
+            }
+
             this.drawHoveringText(text, mouseX, mouseY);
         }
     }
