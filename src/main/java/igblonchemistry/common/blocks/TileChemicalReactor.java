@@ -1,5 +1,7 @@
 package igblonchemistry.common.blocks;
 
+import igblonchemistry.IgblonChemistry;
+import igblonchemistry.chemistry.Compounds;
 import igblonchemistry.chemistry.Mixture;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
@@ -20,8 +22,15 @@ public class TileChemicalReactor extends TileEntity implements ITickable {
     private ArrayList<Mixture> contents = new ArrayList<Mixture>();
 
     @Override
+    public void onLoad() {
+        contents.clear();
+        contents.add(new Mixture(Compounds.Water, 10000));
+    }
+
+    @Override
     public void update() {
 
+        contents.get(0).addCompound(Compounds.Water, 100);
         //Simulate interactions between mixtures
         if (!world.isRemote) {
             //TODO: go through each mixture stored in the reactor and make them interact with each other, like "alloying"
@@ -90,6 +99,7 @@ public class TileChemicalReactor extends TileEntity implements ITickable {
     }
 
     public ArrayList<Mixture> getContents() {
+
         return contents;
     }
 }

@@ -1,6 +1,9 @@
 package igblonchemistry.chemistry;
 
+import igblonchemistry.IgblonChemistry;
+
 import java.util.HashMap;
+import java.util.Map;
 
 public class Mixture {
 
@@ -10,8 +13,8 @@ public class Mixture {
     private double viscosity;
     private double temperature;
 
-    public Mixture() {
-
+    public Mixture(Compound compound, double amount) {
+        components.put(compound, amount);
     }
 
     //Simulate chemical reactions within the mixture, between the compounds in the components list
@@ -24,6 +27,13 @@ public class Mixture {
     }
 
     public Mixture addCompound(Compound compound, double amount) {
+        for (Map.Entry<Compound, Double> entry : components.entrySet()) {
+            if (entry.getKey().compareTo(compound) == 0) {
+                entry.setValue(entry.getValue() + amount);
+                return this;
+            }
+        }
+
         this.components.put(compound, amount);
         return this;
     }
@@ -33,14 +43,33 @@ public class Mixture {
         return null;
     }
 
+    public HashMap<Compound, Double> getComponents() {
+        return components;
+    }
+
     public int getColorAverage() {
-        int colorSum = 0;
-        double totalMols = 0;
-        for (Compound key : components.keySet()) {
-            colorSum += (int) (key.getColor() * components.get(key));
-            totalMols += components.get(key);
+        if (components.size() == 1) {
+            Map.Entry<Compound, Double> entry = components.entrySet().iterator().next();
+            return entry.getKey().getColor();
+        } else {
+            int colorSum = 0;
+            double totalMols = 0;
+            for (Map.Entry<Compound, Double> entry : components.entrySet()) {
+                colorSum += (int) (entry.getKey().getColor() * entry.getValue());
+                totalMols += entry.getValue();
+            }
+            return (int) (colorSum / totalMols);
+        }
+    }
+
+    //Measured in Liters
+    public double getTotalVolume() {
+        double totalVolume = 0;
+
+        for (Map.Entry<Compound, Double> entry : components.entrySet()) {
+            totalVolume += entry.getValue() * entry.getKey().getMolarMass() / entry.getKey().getDensity();
         }
 
-        return (int) (colorSum / totalMols);
+        return totalVolume;
     }
 }

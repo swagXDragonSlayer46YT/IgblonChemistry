@@ -14,6 +14,7 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
 import org.lwjgl.opengl.GL11;
@@ -121,10 +122,17 @@ public class GuiChemicalReactor extends GuiContainer {
 
     public static void renderTiledFluid(int x, int y, int width, int height, float depth, FluidStack fluidStack, ArrayList<Mixture> contents) {
         TextureAtlasSprite fluidSprite = mc.getTextureMapBlocks().getAtlasSprite(fluidStack.getFluid().getStill(fluidStack).toString());
-        setColorRGB(0xfcba03);
+
+        int y2 = y;
 
         for (int i = 0; i < contents.size(); i++) {
-            renderTiledTexture(x, y, width, height, depth, fluidSprite, fluidStack.getFluid().isGaseous(fluidStack));
+            setColorRGB(contents.get(i).getColorAverage());
+
+            //1 Pixel = 20 liters, this will vary reactor by reactor
+            int h = (int) Math.ceil(contents.get(i).getTotalVolume() / 20);
+
+            renderTiledTexture(x, y2 - h, width, h, depth, fluidSprite, fluidStack.getFluid().isGaseous(fluidStack));
+            y2 -= h;
         }
     }
 
@@ -138,7 +146,12 @@ public class GuiChemicalReactor extends GuiContainer {
     protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
         mc.getTextureManager().bindTexture(background);
         drawTexturedModalRect(guiLeft, guiTop, 0, 0, xSize, ySize);
-        drawGuiTank(206,  106, 63, 256, this.zLevel, this.chemicalReactor.getContents());
+
+        drawGuiTank(206,  109, 63, 256, this.zLevel, this.chemicalReactor.getContents());
+    }
+
+    public void getReactorTooltip() {
+
     }
 
     @Override
@@ -148,7 +161,7 @@ public class GuiChemicalReactor extends GuiContainer {
         renderHoveredToolTip(mouseX, mouseY);
 
         ArrayList<String> text = Lists.newArrayList();
-        text.add("gadfgashasf");
+        text.add(TextFormatting.GOLD + "f");
         this.drawHoveringText(text, mouseX, mouseY);
     }
 
