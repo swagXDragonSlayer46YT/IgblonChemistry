@@ -1,39 +1,57 @@
 package igblonchemistry.common.blocks;
 
 import igblonchemistry.IgblonChemistry;
+import igblonchemistry.chemistry.Compound;
 import igblonchemistry.chemistry.Compounds;
 import igblonchemistry.chemistry.Mixture;
+import igblonchemistry.util.IgblonUtils;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 import net.minecraftforge.items.wrapper.CombinedInvWrapper;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 public class TileChemicalReactor extends TileEntity implements ITickable {
 
     public static final int SIZE = 2;
+
+    private double temperature = 293;
 
     private ArrayList<Mixture> contents = new ArrayList<Mixture>();
 
     @Override
     public void onLoad() {
         contents.clear();
-        contents.add(new Mixture(Compounds.Water, 10000));
+        contents.add(new Mixture(this, Compounds.Water, 10000));
+        contents.add(new Mixture(this, Compounds.Salt, 5000));
     }
 
     @Override
     public void update() {
-
-        contents.get(0).addCompound(Compounds.Water, 100);
         //Simulate interactions between mixtures
-        if (!world.isRemote) {
-            //TODO: go through each mixture stored in the reactor and make them interact with each other, like "alloying"
+        //TODO: go through each mixture stored in the reactor and make them interact with each other, like "alloying"
+        for (int i = 0; i < contents.size() - 1; i++) {
+            Mixture currentMix = contents.get(i);
+            Mixture aboveMix = contents.get(i + 1);
+            for (Map.Entry<Compound, Double> currentEntry : currentMix.getComponents().entrySet()) {
+                for (Map.Entry<Compound, Double> aboveEntry : aboveMix.getComponents().entrySet()) {
+                    if (aboveEntry.getKey().getSolubility(currentEntry.getKey(), temperature) > 0) {
+                        currentMix.moveCompound(aboveMix, aboveEntry.getKey(), 10);
+                    }
+                }
+            }
+        }
+
+        for (int h = 0; h < contents.size(); h++) {
+            contents.get(h).update();
         }
     }
 
@@ -101,5 +119,9 @@ public class TileChemicalReactor extends TileEntity implements ITickable {
     public ArrayList<Mixture> getContents() {
 
         return contents;
+    }
+
+    public double getTemperature() {
+        return temperature;
     }
 }

@@ -62,7 +62,7 @@ public class Compound implements Comparable<Compound> {
 
     //Pressure measured in Pascals
     //Temperature measured in Kelvins
-    public double getMeltingPoint(double pressure) {
+    public double getMeltingPoint() {
         return this.meltingPoint;
     }
 

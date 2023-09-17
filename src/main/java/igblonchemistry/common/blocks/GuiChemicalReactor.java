@@ -175,7 +175,6 @@ public class GuiChemicalReactor extends GuiContainer {
             if(y > heights[i]) {
                 return chemicalReactor.getContents().get(i);
             }
-            y -= heights[i];
         }
 
         return null;
@@ -191,10 +190,18 @@ public class GuiChemicalReactor extends GuiContainer {
         if (mixture != null) {
             ArrayList<String> text = Lists.newArrayList();
 
-            text.add(TextFormatting.GOLD + "" + TextFormatting.UNDERLINE + "Liquid");
+            if (mixture.getComponents().size() == 1) {
+                if (mixture.getTemperature() > mixture.getComponents().entrySet().iterator().next().getKey().getMeltingPoint()) {
+                    text.add(TextFormatting.GOLD + "" + TextFormatting.UNDERLINE + "Liquid");
+                } else {
+                    text.add(TextFormatting.GOLD + "" + TextFormatting.UNDERLINE + "Solid");
+                }
+            } else {
+                text.add(TextFormatting.GOLD + "" + TextFormatting.UNDERLINE + "Solution");
+            }
             text.add(TextFormatting.RESET + "Total Volume: " + TextFormatting.AQUA + IgblonUtils.roundToDigit(mixture.getTotalVolume(), 0) + " Liters");
-            text.add(TextFormatting.WHITE + "pH: " + TextFormatting.GREEN + "7 pH");
-            text.add(TextFormatting.WHITE + "Temperature: " + TextFormatting.RED + "273 Kelvin");
+            text.add(TextFormatting.WHITE + "pH: " + TextFormatting.GREEN + "7");
+            text.add(TextFormatting.WHITE + "Temperature: " + TextFormatting.RED + "" + mixture.getTemperature() + " Kelvin");
             text.add("");
             text.add(TextFormatting.GOLD + "" + TextFormatting.UNDERLINE + "Components");
 
