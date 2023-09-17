@@ -10,6 +10,7 @@ public class Compound implements Comparable<Compound> {
 
     private String name;
     private double boilingPoint;
+    private double meltingPoint;
     private int color;
 
     //measured in grams/liter
@@ -49,6 +50,18 @@ public class Compound implements Comparable<Compound> {
 
     public String getName() {
         return this.name;
+    }
+
+    //Taken at 1 atm (~101,000 Pascals)
+    public Compound setMeltingPoint(double meltingPoint) {
+        this.meltingPoint = meltingPoint;
+        return this;
+    }
+
+    //Pressure measured in Pascals
+    //Temperature measured in Kelvins
+    public double getMeltingPoint(double pressure) {
+        return this.meltingPoint;
     }
 
     //Taken at 1 atm (~101,000 Pascals)

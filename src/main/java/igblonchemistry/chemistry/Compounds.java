@@ -10,6 +10,7 @@ public class Compounds {
     public static void register() {
         Water = new Compound("water")
                 .setHeatOfVaporization(40650)
+                .setBoilingPoint(373)
                 .setColor(0x2d6ce0)
                 .setDensity(1000)
                 .setMolarMass(18.01);

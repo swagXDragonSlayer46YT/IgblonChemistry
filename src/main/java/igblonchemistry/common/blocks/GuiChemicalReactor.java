@@ -19,6 +19,7 @@ import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
 import org.lwjgl.opengl.GL11;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 public class GuiChemicalReactor extends GuiContainer {
@@ -150,8 +151,40 @@ public class GuiChemicalReactor extends GuiContainer {
         drawGuiTank(206,  109, 63, 256, this.zLevel, this.chemicalReactor.getContents());
     }
 
-    public void getReactorTooltip() {
+    private int[] calcMixtureHeights(ArrayList<Mixture> contents) {
+        int[] heights = new int[contents.size()];
+        int y = 109;
 
+        for (int i = 0; i < heights.length; i++) {
+            int h = (int) Math.ceil(contents.get(i).getTotalVolume() / 20);
+            y -= h;
+            heights[i] = y;
+        }
+
+        return heights;
+    }
+
+    private Mixture getMixtureHovered(TileChemicalReactor chemicalReactor, int y) {
+        int[] heights = calcMixtureHeights(chemicalReactor.getContents());
+
+        for(int i = 0; i < heights.length; i++) {
+            if(y < heights[i]) {
+                return chemicalReactor.getContents().get(i);
+            }
+            y -= heights[i];
+        }
+
+        return null;
+    }
+
+    public void getReactorTooltip(int mouseX, int mouseY) {
+        Mixture mixture = getMixtureHovered(this.chemicalReactor, mouseY);
+
+        if (mixture != null) {
+            ArrayList<String> text = Lists.newArrayList();
+            text.add(TextFormatting.GOLD + "f");
+            this.drawHoveringText(text, mouseX, mouseY);
+        }
     }
 
     @Override
@@ -160,9 +193,7 @@ public class GuiChemicalReactor extends GuiContainer {
         super.drawScreen(mouseX, mouseY, partialTicks);
         renderHoveredToolTip(mouseX, mouseY);
 
-        ArrayList<String> text = Lists.newArrayList();
-        text.add(TextFormatting.GOLD + "f");
-        this.drawHoveringText(text, mouseX, mouseY);
+        getReactorTooltip(mouseX, mouseY);
     }
 
     /*
