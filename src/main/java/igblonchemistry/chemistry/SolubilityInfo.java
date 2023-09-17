@@ -11,7 +11,7 @@ public class SolubilityInfo {
 
     //Measured in grams per 1 liter.
     //Meant to be overridden for each new solubility info.
-    //Temperature is measured in Celsius.
+    //Temperature is measured in Kelvin.
     //Pressure is assumed to be 1 atmosphere.
     public double calculateSolubility(double temperature) {
         return 0;

@@ -5,6 +5,7 @@ import igblonchemistry.common.GuiHandler;
 import igblonchemistry.common.blocks.ChemicalReactor;
 import igblonchemistry.common.blocks.Blocks;
 import igblonchemistry.common.blocks.TileChemicalReactor;
+import igblonchemistry.common.fluids.ChemistryFluids;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
@@ -20,7 +21,7 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
 public class CommonProxy {
 
     public void preInit(FMLPreInitializationEvent event) {
-
+        ChemistryFluids.init();
     }
 
     public void init(FMLInitializationEvent event) {

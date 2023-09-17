@@ -1,5 +1,7 @@
 package igblonchemistry.chemistry;
 
+import igblonchemistry.common.ChemistryConstants;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -7,6 +9,10 @@ public class Compound implements Comparable<Compound> {
     //SOLUBILITIES TAKEN FROM: https://en.wikipedia.org/wiki/Solubility_table
 
     private String name;
+    private double boilingPoint;
+
+    //measured in Joules/mol
+    private double heatOfVaporization = -1;
 
     private HashMap<Compound, SolubilityInfo> solubilityInfos = new HashMap<Compound, SolubilityInfo>();
 
@@ -36,5 +42,31 @@ public class Compound implements Comparable<Compound> {
 
     public String getName() {
         return this.name;
+    }
+
+    //Taken at 1 atm (~101,000 Pascals)
+    public Compound setBoilingPoint(double boilingPoint) {
+        this.boilingPoint = boilingPoint;
+        return this;
+    }
+
+    //Pressure measured in Pascals
+    //Temperature measured in Kelvins
+    public double getBoilingPoint(double pressure) {
+        if (heatOfVaporization < 0) {
+            //If heat of vaporization is unknown
+            return boilingPoint;
+        } else {
+            return 1 / ((1 / boilingPoint) - (ChemistryConstants.GAS_CONSTANT * Math.log(pressure / 100000)) / heatOfVaporization);
+        }
+    }
+
+    public Compound setHeatOfVaporization(double heatOfVaporization) {
+        this.heatOfVaporization = heatOfVaporization;
+        return this;
+    }
+
+    public double getHeatOfVaporization() {
+        return heatOfVaporization;
     }
 }

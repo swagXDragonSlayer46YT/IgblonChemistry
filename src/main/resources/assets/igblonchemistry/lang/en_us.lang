@@ -2,4 +2,6 @@ item.salt.name=Salt
 
 tile.igblonchemistry.chemical_reactor.name=Chemical Reactor
 
+fluid.chemical=Chemical
+
 itemGroup.Chemistry=Chemistry

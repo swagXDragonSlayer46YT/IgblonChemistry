@@ -23,15 +23,15 @@ public class ContainerChemicalReactor extends Container {
     private void addPlayerSlots(IInventory playerInventory) {
         for (int row = 0; row < 3; ++row) {
             for (int col = 0; col < 9; ++col) {
-                int x = 9 + col * 18;
-                int y = row * 18 + 70;
+                int x = 8 + col * 18;
+                int y = row * 18 + 69;
                 this.addSlotToContainer(new Slot(playerInventory, col + row * 9 + 10, x, y));
             }
         }
 
         for (int row = 0; row < 9; ++row) {
-            int x = 9 + row * 18;
-            int y = 58 + 70;
+            int x = 8 + row * 18;
+            int y = 58 + 69;
             this.addSlotToContainer(new Slot(playerInventory, row, x, y));
         }
     }

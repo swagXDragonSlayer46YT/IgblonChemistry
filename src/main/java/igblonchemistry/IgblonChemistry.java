@@ -4,11 +4,13 @@ import igblonchemistry.proxy.CommonProxy;
 import igblonchemistry.common.blocks.Blocks;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 @Mod(modid = IgblonChemistry.MODID,
@@ -32,10 +34,14 @@ public class IgblonChemistry {
         }
     };
 
+    public IgblonChemistry() {
+        FluidRegistry.enableUniversalBucket();
+    }
+
     @Mod.Instance
     public static IgblonChemistry instance;
 
-    public static Logger logger;
+    public static Logger logger = LogManager.getLogger("test");
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
