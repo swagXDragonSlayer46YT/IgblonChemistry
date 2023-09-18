@@ -126,6 +126,7 @@ public class Chemicals {
     public static Chemical Salt;
     public static Chemical Water;
     public static Chemical SulfuricAcid;
+    public static Chemical SodiumHydroxide;
 
     public static void register() {
         Water = new Chemical("Water", Hydrogen, 2, Oxygen, 1)
@@ -151,6 +152,14 @@ public class Chemicals {
                 .setMolarMass(98.08)
                 .setColor(0xe0721d)
                 .setAcidData(-3, 2, 0);
+
+        SodiumHydroxide = new Chemical("Sodium Hydroxide", Sodium, 1, Oxygen, 1, Hydrogen, 1)
+                .addSolubilityInfo(Water, temperature -> 970 + 0.2 * Math.pow(temperature - 273, 2))
+                .setMeltingPoint(591)
+                .setDensity(2130)
+                .setMolarMass(40)
+                .setColor(0x1f185c)
+                .setAcidData(-3, 0, 1);
     }
 
     public static void registerChemicals() {

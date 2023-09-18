@@ -161,10 +161,11 @@ public class Mixture {
 
         for (Map.Entry<Chemical, Double> entry : components.entrySet()) {
             if (entry.getKey().hasPKA()) {
-                //If acid dissociates completely
+                //If compound dissociates completely
                 if(entry.getKey().getPKA() < 0) {
-                    //Add Molar concentration of H ions
+                    //Add Molar concentration of ions
                     hMolarity += entry.getKey().getHIons() * (entry.getValue() / totalVolume);
+                    ohMolarity += entry.getKey().getOHIons() * (entry.getValue() / totalVolume);
                 } else {
                     hMolarity += entry.getKey().getPKA() * entry.getKey().getHIons() * (entry.getValue() / totalVolume);
                     ohMolarity += entry.getKey().getPKA() * entry.getKey().getOHIons() * (entry.getValue() / totalVolume);
@@ -186,7 +187,7 @@ public class Mixture {
             } else if (hMolarity > ohMolarity) {
                 pH = -Math.log10(hMolarity - ohMolarity);
             } else {
-                pH = 14 - Math.log10(ohMolarity - hMolarity);
+                pH = 14 + Math.log10(ohMolarity - hMolarity);
             }
         }
 
