@@ -147,17 +147,10 @@ public class GuiChemicalReactor extends GuiContainer {
         setColorRGB(0xffffff);
     }
 
-    @Override
-    protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
-        mc.getTextureManager().bindTexture(background);
-        drawTexturedModalRect(guiLeft, guiTop, 0, 0, xSize, ySize);
-
-        drawGuiTank(206,  109, 63, 256, this.zLevel, this.chemicalReactor.getContents());
-    }
 
     private int[] calcMixtureHeights(ArrayList<Mixture> contents) {
         int[] heights = new int[contents.size()];
-        int y = 109;
+        int y = getGuiTop() + 58;
 
         for (int i = 0; i < heights.length; i++) {
             int h = (int) Math.ceil(contents.get(i).getTotalVolume() / 20);
@@ -172,7 +165,7 @@ public class GuiChemicalReactor extends GuiContainer {
         int[] heights = calcMixtureHeights(chemicalReactor.getContents());
 
         for(int i = 0; i < heights.length; i++) {
-            if(y > heights[i]) {
+            if(y >= heights[i]) {
                 return chemicalReactor.getContents().get(i);
             }
         }
@@ -180,8 +173,8 @@ public class GuiChemicalReactor extends GuiContainer {
         return null;
     }
 
-    public void getReactorTooltip(int mouseX, int mouseY) {
-        if (mouseX < 206 || mouseX > 269 || mouseY > 109) {
+    public void getReactorTooltip(int guiLeft, int guiTop, int mouseX, int mouseY) {
+        if (mouseX < guiLeft + 56 || mouseX > guiLeft + 116 || mouseY > guiTop + 58) {
             return;
         }
 
@@ -219,12 +212,20 @@ public class GuiChemicalReactor extends GuiContainer {
     }
 
     @Override
+    protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
+        mc.getTextureManager().bindTexture(background);
+        drawTexturedModalRect(guiLeft, guiTop, 0, 0, xSize, ySize);
+
+        drawGuiTank(guiLeft + 56,  guiTop + 58, 63, 256, this.zLevel, this.chemicalReactor.getContents());
+    }
+
+    @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
         drawDefaultBackground();
         super.drawScreen(mouseX, mouseY, partialTicks);
         renderHoveredToolTip(mouseX, mouseY);
 
-        getReactorTooltip(mouseX, mouseY);
+        getReactorTooltip(guiLeft, guiTop, mouseX, mouseY);
     }
 
     /*
