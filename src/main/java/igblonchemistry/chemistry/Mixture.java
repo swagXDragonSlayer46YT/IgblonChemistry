@@ -57,8 +57,23 @@ public class Mixture {
         calculateTotalVolume();
 
         runPossibleReactions();
+
+        cleanComponentsList();
     }
 
+    //remove chemical from chemical list if there is 0 of it
+    public void cleanComponentsList() {
+        ArrayList<Chemical> chemicalsToRemove = new ArrayList<Chemical>();
+        for (Map.Entry<Chemical, Double> entry : components.entrySet()) {
+            if (entry.getValue() <= 0) {
+                chemicalsToRemove.add(entry.getKey());
+            }
+        }
+
+        for (Chemical chemical : chemicalsToRemove) {
+            components.remove(chemical);
+        }
+    }
     //Runs through all chemical reactions, sees which ones are valid, and runs the valid ones
     //Multiple chemical reactions may occur at once
     public void runPossibleReactions() {
@@ -115,15 +130,6 @@ public class Mixture {
 
             totalHeatCapacity += entry.getKey().getHeatCapacity() * entry.getValue();
             totalMoles += entry.getValue();
-
-            //TODO: MOVE TO SOMEWHERE WHERE IT WONT CAUSE A CME
-            /*
-            //remove chemical from chemical list if there is 0 of it
-            if (entry.getValue() <= 0) {
-                components.remove(entry.getKey());
-            }
-
-             */
         }
         totalMols = totalMoles;
         averageHeatCapacity = totalHeatCapacity / totalMoles;
