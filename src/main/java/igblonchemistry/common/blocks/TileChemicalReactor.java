@@ -1,16 +1,15 @@
 package igblonchemistry.common.blocks;
 
 import igblonchemistry.IgblonChemistry;
-import igblonchemistry.chemistry.Compound;
-import igblonchemistry.chemistry.Compounds;
+import igblonchemistry.chemistry.Chemical;
+import igblonchemistry.chemistry.Chemicals;
+import igblonchemistry.chemistry.GaseousMixture;
 import igblonchemistry.chemistry.Mixture;
-import igblonchemistry.util.IgblonUtils;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
-import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
@@ -21,30 +20,30 @@ import java.util.Map;
 
 public class TileChemicalReactor extends TileEntity implements ITickable {
 
-    public static final int SIZE = 2;
-
     private double temperature = 293;
 
     private ArrayList<Mixture> contents = new ArrayList<Mixture>();
+    private GaseousMixture containedGas;
 
     @Override
     public void onLoad() {
         contents.clear();
-        contents.add(new Mixture(this, Compounds.Water, 10000));
-        contents.add(new Mixture(this, Compounds.Salt, 5000));
+        contents.add(new Mixture(this, Chemicals.Water, 10000));
+        contents.add(new Mixture(this, Chemicals.SulfuricAcid, 5000));
     }
 
     @Override
     public void update() {
         //Simulate interactions between mixtures
-        //TODO: go through each mixture stored in the reactor and make them interact with each other, like "alloying"
+
         for (int i = 0; i < contents.size() - 1; i++) {
             Mixture currentMix = contents.get(i);
             Mixture aboveMix = contents.get(i + 1);
-            for (Map.Entry<Compound, Double> currentEntry : currentMix.getComponents().entrySet()) {
-                for (Map.Entry<Compound, Double> aboveEntry : aboveMix.getComponents().entrySet()) {
+            for (Map.Entry<Chemical, Double> currentEntry : currentMix.getComponents().entrySet()) {
+                for (Map.Entry<Chemical, Double> aboveEntry : aboveMix.getComponents().entrySet()) {
+                    IgblonChemistry.logger.warn(aboveEntry.getKey().getSolubility(currentEntry.getKey(), temperature));
                     if (aboveEntry.getKey().getSolubility(currentEntry.getKey(), temperature) > 0) {
-                        currentMix.moveCompound(aboveMix, aboveEntry.getKey(), 10);
+                        currentMix.moveChemical(aboveMix, aboveEntry.getKey(), 10);
                     }
                 }
             }
@@ -55,14 +54,14 @@ public class TileChemicalReactor extends TileEntity implements ITickable {
         }
     }
 
-    private ItemStackHandler inputHandler = new ItemStackHandler(SIZE) {
+    private ItemStackHandler inputHandler = new ItemStackHandler(1) {
         @Override
         protected void onContentsChanged(int slot) {
             TileChemicalReactor.this.markDirty();
         }
     };
 
-    private ItemStackHandler outputHandler = new ItemStackHandler(SIZE) {
+    private ItemStackHandler outputHandler = new ItemStackHandler(1) {
         @Override
         protected void onContentsChanged(int slot) {
             TileChemicalReactor.this.markDirty();

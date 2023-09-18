@@ -2,14 +2,13 @@ package igblonchemistry.common.blocks;
 
 import com.google.common.collect.Lists;
 import igblonchemistry.IgblonChemistry;
-import igblonchemistry.chemistry.Compound;
+import igblonchemistry.chemistry.Chemical;
 import igblonchemistry.chemistry.Mixture;
-import igblonchemistry.client.renderer.Textures;
+import igblonchemistry.client.renderer.RenderingUtils;
 import igblonchemistry.util.IgblonUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 
@@ -21,7 +20,6 @@ import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
 import org.lwjgl.opengl.GL11;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -97,41 +95,13 @@ public class GuiChemicalReactor extends GuiContainer {
         tessellator.draw();
     }
 
-    public static int red(int c) {
-        return (c >> 16) & 0xFF;
-    }
-
-    public static int green(int c) {
-        return (c >> 8) & 0xFF;
-    }
-
-    public static int blue(int c) {
-        return (c) & 0xFF;
-    }
-
-    public static void setColorRGB(int color, int transparency) {
-        float r = red(color) / 255.0F;
-        float g = green(color) / 255.0F;
-        float b = blue(color) / 255.0F;
-
-        GlStateManager.color(r, g, b, (float) transparency);
-    }
-
-    public static void setColorRGB(int color) {
-        float r = red(color) / 255.0F;
-        float g = green(color) / 255.0F;
-        float b = blue(color) / 255.0F;
-
-        GlStateManager.color(r, g, b, 255.0F);
-    }
-
     public static void renderTiledFluid(int x, int y, int width, int height, float depth, FluidStack fluidStack, ArrayList<Mixture> contents) {
         TextureAtlasSprite fluidSprite = mc.getTextureMapBlocks().getAtlasSprite(fluidStack.getFluid().getStill(fluidStack).toString());
 
         int y2 = y;
 
         for (int i = 0; i < contents.size(); i++) {
-            setColorRGB(contents.get(i).getColorAverage());
+            RenderingUtils.setColorRGB(contents.get(i).getColorAverage());
 
             //1 Pixel = 20 liters, this will vary reactor by reactor
             int h = (int) Math.ceil(contents.get(i).getTotalVolume() / 20);
@@ -144,7 +114,7 @@ public class GuiChemicalReactor extends GuiContainer {
     public static void drawGuiTank(int x, int y, int w, int height, float zLevel, ArrayList<Mixture> contents) {
         FluidStack liquid = FluidRegistry.getFluidStack("water", 100);
         renderTiledFluid(x, y, w, 5, zLevel, liquid, contents);
-        setColorRGB(0xffffff);
+        RenderingUtils.setColorRGB(0xffffff);
     }
 
 
@@ -190,20 +160,24 @@ public class GuiChemicalReactor extends GuiContainer {
                     text.add(TextFormatting.GOLD + "" + TextFormatting.UNDERLINE + "Solid");
                 }
             } else {
-                text.add(TextFormatting.GOLD + "" + TextFormatting.UNDERLINE + "Solution");
+                text.add(TextFormatting.GOLD + "" + TextFormatting.UNDERLINE + "Mixture");
             }
             text.add(TextFormatting.RESET + "Total Volume: " + TextFormatting.AQUA + IgblonUtils.roundToDigit(mixture.getTotalVolume(), 0) + " Liters");
-            text.add(TextFormatting.WHITE + "pH: " + TextFormatting.GREEN + "7");
+
+            if (mixture.getHasPH()) {
+                text.add(TextFormatting.WHITE + "pH: " + TextFormatting.GREEN + "" + IgblonUtils.roundToDigit(mixture.getPH(), 2));
+            }
+
             text.add(TextFormatting.WHITE + "Temperature: " + TextFormatting.RED + "" + mixture.getTemperature() + " Kelvin");
             text.add("");
             text.add(TextFormatting.GOLD + "" + TextFormatting.UNDERLINE + "Components");
 
-            HashMap<Compound, Double> components = mixture.getComponents();
+            HashMap<Chemical, Double> components = mixture.getComponents();
             double[] individualVolumes = mixture.getIndividualVolumes();
             int i = 0;
 
-            for (Map.Entry<Compound, Double> entry : components.entrySet()) {
-                text.add(TextFormatting.RESET + entry.getKey().getName() + ": " + TextFormatting.GRAY + IgblonUtils.roundToDigit(entry.getValue(), 2) + " mol " + TextFormatting.DARK_GRAY + "(" + IgblonUtils.roundToDigit(individualVolumes[i], 0) + " Liters)");
+            for (Map.Entry<Chemical, Double> entry : components.entrySet()) {
+                text.add(TextFormatting.RESET + entry.getKey().getName() + ": " + TextFormatting.GRAY + IgblonUtils.addCommas(IgblonUtils.roundToDigit(entry.getValue(), 2)) + " mol " + TextFormatting.DARK_GRAY + "(" + IgblonUtils.roundToDigit(individualVolumes[i], 0) + " Liters)");
                 i++;
             }
 

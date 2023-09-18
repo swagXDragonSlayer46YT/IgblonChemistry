@@ -5,6 +5,8 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
+import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.SlotItemHandler;
@@ -39,17 +41,15 @@ public class ContainerChemicalReactor extends Container {
     private void addOwnSlots() {
         IItemHandler itemHandler = this.tileChemicalReactor.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
 
-        int x = 9;
-        int y = 6;
+        addSlotToContainer(new SlotItemHandler(itemHandler, 0, 26, 13));
 
-        int slotIndex = 0;
-        for (int i = 0; i < itemHandler.getSlots(); i++) {
-            addSlotToContainer(new SlotItemHandler(itemHandler, slotIndex, x, y));
-            slotIndex++;
-            x += 18;
-        }
+        //IFluidHandler fluidHandler = this.tileChemicalReactor.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, null);
+
+        //addSlotToContainer(new Slot (itemHandler, 1, 26, 38));
     }
 
+    //I'm assuming that this function moves items to occupy the leftmost slots of the container, but this will only have 1 item slot anyways
+    /*
     @Override
     public ItemStack transferStackInSlot(EntityPlayer playerIn, int index) {
         ItemStack itemStack = ItemStack.EMPTY;
@@ -76,6 +76,8 @@ public class ContainerChemicalReactor extends Container {
 
         return itemStack;
     }
+
+     */
 
     @Override
     public boolean canInteractWith(EntityPlayer playerIn) {

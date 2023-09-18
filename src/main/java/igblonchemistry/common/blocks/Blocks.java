@@ -20,8 +20,6 @@ public class Blocks {
 
     }
 
-    //TODO: MAKE COMMON CLASS FOR EVERY CHEMICAL REACTOR, HAVE EACH MACHINE EXTEND OFF OF IT
-
     @SideOnly(Side.CLIENT)
     public static void initModels() {
         chemicalReactor.initModel();

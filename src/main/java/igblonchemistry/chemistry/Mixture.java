@@ -1,6 +1,5 @@
 package igblonchemistry.chemistry;
 
-import igblonchemistry.IgblonChemistry;
 import igblonchemistry.common.blocks.TileChemicalReactor;
 
 import java.util.HashMap;
@@ -9,26 +8,29 @@ import java.util.Map;
 public class Mixture {
 
     //Compound & amount of moles
-    private HashMap<Compound, Double> components = new HashMap<Compound, Double>();
+    private HashMap<Chemical, Double> components = new HashMap<Chemical, Double>();
 
-    private double viscosity;
     private double temperature = 293;
-    private double pH = 7;
+
+    private boolean hasPH;
+    private double pH = 0;
+
+    private double totalVolume;
 
     public TileChemicalReactor chemicalReactor;
 
-    public Mixture(TileChemicalReactor chemicalReactor, Compound compound, double amount) {
-        components.put(compound, amount);
+    public Mixture(TileChemicalReactor chemicalReactor, Chemical chemical, double amount) {
+        components.put(chemical, amount);
         this.chemicalReactor = chemicalReactor;
     }
 
-    //Simulate chemical reactions within the mixture, between the compounds in the components list
+    //Simulate chemical reactions within the mixture, between the chemicals in the chemical list
     public void update() {
 
         //Delete itself if mixture is empty
         boolean isEmpty = true;
 
-        for (Map.Entry<Compound, Double> entry : components.entrySet()) {
+        for (Map.Entry<Chemical, Double> entry : components.entrySet()) {
             if (entry.getValue() > 0) {
                 isEmpty = false;
             }
@@ -38,57 +40,67 @@ public class Mixture {
             chemicalReactor.getContents().remove(this);
         }
 
-        //TODO: SIMULATE CHEMICAL REACTIONS WITHIN MIXTURE, BETWEEN COMPONENT LIST
+        updateVariables();
+        calculatePH();
+        calculateTotalVolume();
+        //THE MIXTURE SHOULD SIMULATE CHEMICAL REACTIONS WITHIN THE MIXTURE (IF ANY ARE POSSIBLE) BETWEEN ITS COMPONENTS EVERY TICK
     }
 
-    public double getViscosity() {
-        return viscosity;
+    public void updateVariables() {
+        for (Map.Entry<Chemical, Double> entry : components.entrySet()) {
+            //remove chemical from chemical list if there is 0 of it
+            if (entry.getValue() <= 0) {
+                components.remove(entry.getKey());
+            }
+        }
     }
 
-    public Mixture addCompound(Compound compound, double amount) {
-        for (Map.Entry<Compound, Double> entry : components.entrySet()) {
-            if (entry.getKey().compareTo(compound) == 0) {
+    public Mixture addChemical(Chemical chemical, double amount) {
+        for (Map.Entry<Chemical, Double> entry : components.entrySet()) {
+            if (entry.getKey().compareTo(chemical) == 0) {
                 entry.setValue(entry.getValue() + amount);
                 return this;
             }
         }
 
-        this.components.put(compound, amount);
+        this.components.put(chemical, amount);
         return this;
     }
 
-    public Mixture moveCompound(Mixture mixtureFrom, Compound compoundToMove, double amount) {
+    public Mixture moveChemical(Mixture mixtureFrom, Chemical chemicalToMove, double amount) {
         //Add an amount to this mixture, remove the same amount from another mixture
-        addCompound(compoundToMove, amount);
+        addChemical(chemicalToMove, amount);
 
-        for (Map.Entry<Compound, Double> entry : mixtureFrom.getComponents().entrySet()) {
-            if (entry.getKey().compareTo(compoundToMove) == 0) {
+        for (Map.Entry<Chemical, Double> entry : mixtureFrom.getComponents().entrySet()) {
+            if (entry.getKey().compareTo(chemicalToMove) == 0) {
                 entry.setValue(entry.getValue() - amount);
             }
         }
         return this;
     }
 
-    public Mixture moveCompound(Mixture mixtureFrom, double percentage) {
-        //TODO: MOVING PERCENTAGES OF AN ENTIRE MIXTURE AT ONCE
+    public Mixture moveChemical(Mixture mixtureFrom, double percentage) {
+        //THIS FUNCTION SHOULD MOVE PERCENTAGES OF AN ENTIRE MIXTURE AT ONCE
         return this;
     }
 
-    public HashMap<Compound, Double> getComponents() {
+    public HashMap<Chemical, Double> getComponents() {
         return components;
     }
 
     public int getColorAverage() {
         if (components.size() == 1) {
-            Map.Entry<Compound, Double> entry = components.entrySet().iterator().next();
+            Map.Entry<Chemical, Double> entry = components.entrySet().iterator().next();
             return entry.getKey().getColor();
         } else {
             int colorSum = 0;
             double totalMols = 0;
-            for (Map.Entry<Compound, Double> entry : components.entrySet()) {
-                colorSum += (int) (entry.getKey().getColor() * entry.getValue());
+
+            for (Map.Entry<Chemical, Double> entry : components.entrySet()) {
+                colorSum += entry.getKey().getColor() * entry.getValue();
                 totalMols += entry.getValue();
             }
+
             return (int) (colorSum / totalMols);
         }
     }
@@ -97,7 +109,7 @@ public class Mixture {
         double[] volumes = new double[components.size()];
         int i = 0;
 
-        for (Map.Entry<Compound, Double> entry : components.entrySet()) {
+        for (Map.Entry<Chemical, Double> entry : components.entrySet()) {
             volumes[i] = entry.getValue() * entry.getKey().getMolarMass() / entry.getKey().getDensity();
             i++;
         }
@@ -117,12 +129,64 @@ public class Mixture {
         return totalVolume;
     }
 
+    public void calculateTotalVolume() {
+        double[] volumes = getIndividualVolumes();
+        double tVolume = 0;
+
+        for (double a : volumes) {
+            tVolume += a;
+        }
+
+        totalVolume = tVolume;
+    }
+
     //Measured in Kelvin
     public double getTemperature() {
         return temperature;
     }
 
+    public void calculatePH() {
+        double hMolarity = 0;
+        double ohMolarity = 0;
+        boolean isPureAcid = false;
+        for (Map.Entry<Chemical, Double> entry : components.entrySet()) {
+            if (entry.getKey().hasPKA()) {
+                //If acid dissociates completely
+                if(entry.getKey().getPKA() < 0) {
+                    //Add Molar concentration of H ions
+                    hMolarity += entry.getKey().getHIons() * (entry.getValue() / totalVolume);
+                } else {
+                    hMolarity += entry.getKey().getPKA() * entry.getKey().getHIons() * (entry.getValue() / totalVolume);
+                    ohMolarity += entry.getKey().getPKA() * entry.getKey().getOHIons() * (entry.getValue() / totalVolume);
+                }
+                //TODO: Partial acid dissociations
+                //SOURCE: https://chem.libretexts.org/Bookshelves/Physical_and_Theoretical_Chemistry_Textbook_Maps/Supplemental_Modules_(Physical_and_Theoretical_Chemistry)/Acids_and_Bases/Monoprotic_Versus_Polyprotic_Acids_And_Bases/Calculating_the_pH_of_the_Solution_of_a_Polyprotic_Base%2F%2FAcid
+            }
+        }
+
+        //pH + pOH = 14
+        if (hMolarity == 0 && hMolarity == 0) {
+            pH = 7;
+            hasPH = false;
+        } else {
+            hasPH = true;
+            if (hMolarity == ohMolarity) {
+                pH = 7;
+            } else if (hMolarity > ohMolarity) {
+                pH = -Math.log10(hMolarity - ohMolarity);
+            } else {
+                pH = 14 - Math.log10(ohMolarity - hMolarity);
+            }
+        }
+
+        //SOURCE: https://www.youtube.com/watch?v=fFjjh1DFYgo
+    }
+
     public double getPH() {
         return pH;
+    }
+
+    public boolean getHasPH() {
+        return hasPH;
     }
 }

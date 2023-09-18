@@ -10,14 +10,12 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class Textures {
 
-    @SideOnly(Side.CLIENT)
     public static TextureAtlasSprite CHEMICAL;
 
-    @SideOnly(Side.CLIENT)
     public static void register() {
         Minecraft mc = Minecraft.getMinecraft();
         TextureMap textureMap = mc.getTextureMapBlocks();
 
-        CHEMICAL = textureMap.registerSprite(new ResourceLocation(IgblonChemistry.MODID, "blocks/fluids/ttt"));
+        CHEMICAL = textureMap.registerSprite(new ResourceLocation(IgblonChemistry.MODID, "blocks/fluids/chemical"));
     }
 }

@@ -1,5 +1,6 @@
 package igblonchemistry.proxy;
 
+import igblonchemistry.IgblonChemistry;
 import igblonchemistry.client.renderer.Textures;
 import igblonchemistry.common.blocks.Blocks;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
@@ -23,11 +24,10 @@ public class ClientProxy extends CommonProxy {
     @Override
     public void init(FMLInitializationEvent event) {
         super.init(event);
-
         Textures.register();
+        IgblonChemistry.logger.warn(Textures.CHEMICAL);
     }
 
-    //TODO: MAKE BLOCK AND ITEM REGISTRATION CONSISTENT
     @Override
     public void registerItemRenderer(Item item, int meta, String id) {
         ModelLoader.setCustomModelResourceLocation(item, meta, new ModelResourceLocation(item.getRegistryName(), id));
