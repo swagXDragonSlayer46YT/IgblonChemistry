@@ -28,8 +28,8 @@ public class TileChemicalReactor extends TileEntity implements ITickable {
     @Override
     public void onLoad() {
         contents.clear();
-        contents.add(new Mixture(this, Chemicals.Water, 10000));
-        contents.add(new Mixture(this, Chemicals.SulfuricAcid, 4));
+        //contents.add(new Mixture(this, Chemicals.Water, 10000));
+        contents.add(new Mixture(this, Chemicals.SulfuricAcid, 2500));
         contents.add(new Mixture(this, Chemicals.SodiumHydroxide, 2500));
     }
 
@@ -40,13 +40,17 @@ public class TileChemicalReactor extends TileEntity implements ITickable {
         for (int i = 0; i < contents.size() - 1; i++) {
             Mixture currentMix = contents.get(i);
             Mixture aboveMix = contents.get(i + 1);
-            for (Map.Entry<Chemical, Double> currentEntry : currentMix.getComponents().entrySet()) {
+
+            //Solubility stuff, will be removed since solids can mix with liquids regardless of solubility
+
+            //for (Map.Entry<Chemical, Double> currentEntry : currentMix.getComponents().entrySet()) {
                 for (Map.Entry<Chemical, Double> aboveEntry : aboveMix.getComponents().entrySet()) {
-                    if (aboveEntry.getKey().getSolubility(currentEntry.getKey(), temperature) > 0) {
-                        currentMix.moveChemical(aboveMix, aboveEntry.getKey(), Math.min(0.01, aboveEntry.getValue()));
-                    }
+                    //if (aboveEntry.getKey().getSolubility(currentEntry.getKey(), temperature) > 0) {
+                        currentMix.moveChemical(aboveMix, aboveEntry.getKey(), Math.min(0.2, aboveEntry.getValue()));
+                    //}
                 }
-            }
+            //}
+
         }
 
         for (int h = 0; h < contents.size(); h++) {

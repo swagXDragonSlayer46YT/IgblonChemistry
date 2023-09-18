@@ -15,6 +15,10 @@ public class RenderingUtils {
         return (c) & 0xFF;
     }
 
+    public static int RGBtoHex(int r, int g, int b) {
+        return Integer.parseInt(String.format("%02x%02x%02x", r, g, b), 16);
+    }
+
     public static void setColorRGB(int color, int transparency) {
         float r = red(color) / 255.0F;
         float g = green(color) / 255.0F;

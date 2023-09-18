@@ -27,6 +27,9 @@ public class Chemical implements Comparable<Chemical> {
     private int hIons;
     private int ohIons;
 
+    //measured in Joules/moles
+    private double heatCapacity = 4.184;
+
     //pKa will only apply to certain compounds
     private boolean hasPKA = false;
 
@@ -58,6 +61,15 @@ public class Chemical implements Comparable<Chemical> {
 
     public ArrayList<Chemical> getImmiscibilities() {
         return immiscibleWith;
+    }
+
+    public Chemical setHeatCapacity(double heatCapacity) {
+        this.heatCapacity = heatCapacity;
+        return this;
+    }
+
+    public double getHeatCapacity() {
+        return heatCapacity;
     }
 
     public Chemical addSolubilityInfo(Chemical chemical, SolubilityInfo solubilityInfo) {

@@ -1,6 +1,7 @@
 package igblonchemistry.proxy;
 
 import igblonchemistry.IgblonChemistry;
+import igblonchemistry.chemistry.ChemicalReactions;
 import igblonchemistry.chemistry.Chemicals;
 import igblonchemistry.client.renderer.Textures;
 import igblonchemistry.common.GuiHandler;
@@ -25,6 +26,7 @@ public class CommonProxy {
     public void preInit(FMLPreInitializationEvent event) {
         ChemistryFluids.init();
         Chemicals.register();
+        ChemicalReactions.register();
     }
 
     public void init(FMLInitializationEvent event) {

@@ -1,8 +1,12 @@
 package igblonchemistry.chemistry;
 
+import igblonchemistry.IgblonChemistry;
+import igblonchemistry.client.renderer.RenderingUtils;
 import igblonchemistry.common.blocks.TileChemicalReactor;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class Mixture {
@@ -10,12 +14,16 @@ public class Mixture {
     //Compound & amount of moles
     private HashMap<Chemical, Double> components = new HashMap<Chemical, Double>();
 
+    private ArrayList<Chemical> containedChemicals = new ArrayList<Chemical>();
+
     private double temperature = 293;
 
     private boolean hasPH;
     private double pH = 0;
+    private double averageHeatCapacity;
 
     private double totalVolume;
+    private double totalMols;
     private boolean isAqueous;
 
     public TileChemicalReactor chemicalReactor;
@@ -42,22 +50,83 @@ public class Mixture {
         }
 
         updateVariables();
+
+        containedChemicals = new ArrayList<>(components.keySet());
+
         calculatePH();
         calculateTotalVolume();
-        //THE MIXTURE SHOULD SIMULATE CHEMICAL REACTIONS WITHIN THE MIXTURE (IF ANY ARE POSSIBLE) BETWEEN ITS COMPONENTS EVERY TICK
+
+        runPossibleReactions();
     }
 
+    //Runs through all chemical reactions, sees which ones are valid, and runs the valid ones
+    //Multiple chemical reactions may occur at once
+    public void runPossibleReactions() {
+
+        for (ChemicalReaction chemicalReaction : ChemicalReactions.chemicalReactions) {
+            boolean canRun = checkIfReactionPossible(chemicalReaction);
+
+            if (canRun) {
+                //TODO: Calculate how much of the reaction should occur, if necessary, find limiting factor
+                double reactionAmount = 0.2;
+
+                for (Map.Entry<Chemical, Integer> entry : chemicalReaction.getReactants().entrySet()) {
+                    removeChemical(entry.getKey(), entry.getValue() * reactionAmount);
+                }
+                for (Map.Entry<Chemical, Integer> entry : chemicalReaction.getProducts().entrySet()) {
+                    addChemical(entry.getKey(), entry.getValue() * reactionAmount);
+                }
+                addJoules(-chemicalReaction.getEnthalpyChange() * reactionAmount);
+            }
+        }
+    }
+
+    public boolean checkIfReactionPossible(ChemicalReaction chemicalReaction) {
+        ArrayList<Chemical> reactantsNeeded = chemicalReaction.getReactantArray();
+
+        //Check if this mixture contains each chemical needed in the reaction, return false if any single required chemical is not found (reaction impossible)
+        for (Chemical reactant : reactantsNeeded) {
+            boolean reactantFound = false;
+            for (Chemical chemical : containedChemicals) {
+                if (chemical.compareTo(reactant) == 0) {
+                    reactantFound = true;
+                    break;
+                }
+            }
+
+            if (!reactantFound) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    //Update all variables in one function
     public void updateVariables() {
         isAqueous = false;
+        double totalHeatCapacity = 0;
+        double totalMoles = 0;
+
         for (Map.Entry<Chemical, Double> entry : components.entrySet()) {
-            //remove chemical from chemical list if there is 0 of it
             if (entry.getKey().compareTo(Chemicals.Water) == 0) {
                 isAqueous = true;
             }
+
+            totalHeatCapacity += entry.getKey().getHeatCapacity() * entry.getValue();
+            totalMoles += entry.getValue();
+
+            //TODO: MOVE TO SOMEWHERE WHERE IT WONT CAUSE A CME
+            /*
+            //remove chemical from chemical list if there is 0 of it
             if (entry.getValue() <= 0) {
                 components.remove(entry.getKey());
             }
+
+             */
         }
+        totalMols = totalMoles;
+        averageHeatCapacity = totalHeatCapacity / totalMoles;
     }
 
     public Mixture addChemical(Chemical chemical, double amount) {
@@ -69,6 +138,17 @@ public class Mixture {
         }
 
         this.components.put(chemical, amount);
+        return this;
+    }
+
+    public Mixture removeChemical(Chemical chemical, double amount) {
+        for (Map.Entry<Chemical, Double> entry : components.entrySet()) {
+            if (entry.getKey().compareTo(chemical) == 0) {
+                entry.setValue(Math.max(entry.getValue() - amount, 0));
+                return this;
+            }
+        }
+
         return this;
     }
 
@@ -98,15 +178,19 @@ public class Mixture {
             Map.Entry<Chemical, Double> entry = components.entrySet().iterator().next();
             return entry.getKey().getColor();
         } else {
-            int colorSum = 0;
-            double totalMols = 0;
+            int rSum = 0;
+            int gSum = 0;
+            int bSum = 0;
+            int totalMols = 0;
 
             for (Map.Entry<Chemical, Double> entry : components.entrySet()) {
-                colorSum += entry.getKey().getColor() * entry.getValue();
+                rSum += RenderingUtils.red(entry.getKey().getColor()) * entry.getValue();
+                gSum += RenderingUtils.green(entry.getKey().getColor()) * entry.getValue();
+                bSum += RenderingUtils.blue(entry.getKey().getColor()) * entry.getValue();
                 totalMols += entry.getValue();
             }
 
-            return (int) (colorSum / totalMols);
+            return RenderingUtils.RGBtoHex(rSum / totalMols, gSum / totalMols, bSum / totalMols);
         }
     }
 
@@ -204,5 +288,10 @@ public class Mixture {
 
     public boolean getIsAqueous() {
         return isAqueous;
+    }
+
+    //Add an amount of joules to this mixture, changing its temperature based on its heat capacity
+    public void addJoules(double joules) {
+        temperature += (joules / averageHeatCapacity) / totalMols;
     }
 }

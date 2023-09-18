@@ -176,7 +176,7 @@ public class GuiChemicalReactor extends GuiContainer {
                 text.add(TextFormatting.WHITE + "pH: " + TextFormatting.GREEN + "" + IgblonUtils.roundToDigit(mixture.getPH(), 2));
             }
 
-            text.add(TextFormatting.WHITE + "Temperature: " + TextFormatting.RED + "" + mixture.getTemperature() + " Kelvin");
+            text.add(TextFormatting.WHITE + "Temperature: " + TextFormatting.RED + "" + IgblonUtils.roundToDigit(mixture.getTemperature(), 0) + " Kelvin");
             text.add("");
             text.add(TextFormatting.GOLD + "" + TextFormatting.UNDERLINE + "Components");
 

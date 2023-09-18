@@ -127,6 +127,7 @@ public class Chemicals {
     public static Chemical Water;
     public static Chemical SulfuricAcid;
     public static Chemical SodiumHydroxide;
+    public static Chemical SodiumSulfate;
 
     public static void register() {
         Water = new Chemical("Water", Hydrogen, 2, Oxygen, 1)
@@ -136,6 +137,7 @@ public class Chemicals {
                 .setColor(0x2d6ce0)
                 .setDensity(1000)
                 .setMolarMass(18.01)
+                .setHeatCapacity(75.38)
                 .setAcidData(14, 1, 1);
 
         Salt = new Chemical("Salt", Sodium, 1, Chlorine, 1)
@@ -143,6 +145,7 @@ public class Chemicals {
                 .setMeltingPoint(1074)
                 .setDensity(2160)
                 .setMolarMass(58.44)
+                .setHeatCapacity(51.42)
                 .setColor(0xffffff);
 
         SulfuricAcid = new Chemical("Sulfuric Acid", Hydrogen, 2, Sulfur, 1, Oxygen, 4)
@@ -151,6 +154,7 @@ public class Chemicals {
                 .setDensity(1840)
                 .setMolarMass(98.08)
                 .setColor(0xe0721d)
+                .setHeatCapacity(136)
                 .setAcidData(-3, 2, 0);
 
         SodiumHydroxide = new Chemical("Sodium Hydroxide", Sodium, 1, Oxygen, 1, Hydrogen, 1)
@@ -159,7 +163,16 @@ public class Chemicals {
                 .setDensity(2130)
                 .setMolarMass(40)
                 .setColor(0x1f185c)
+                .setHeatCapacity(64.43)
                 .setAcidData(-3, 0, 1);
+
+        SodiumSulfate = new Chemical("Sodium Sulfate", Sodium, 2, Sulfur, 1, Oxygen, 4)
+                .addSolubilityInfo(Water, temperature -> temperature < 308 ? 49 + 0.4 * Math.pow(temperature - 273, 2) : temperature > 308 ? 539 - 2 * (temperature - 308) : 539)
+                .setMeltingPoint(1157)
+                .setDensity(2660)
+                .setMolarMass(142)
+                .setHeatCapacity(128.2)
+                .setColor(0xe3e89e);
     }
 
     public static void registerChemicals() {
