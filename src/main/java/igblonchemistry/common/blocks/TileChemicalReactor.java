@@ -29,7 +29,7 @@ public class TileChemicalReactor extends TileEntity implements ITickable {
     public void onLoad() {
         contents.clear();
         contents.add(new Mixture(this, Chemicals.Water, 10000));
-        contents.add(new Mixture(this, Chemicals.SulfuricAcid, 5000));
+        contents.add(new Mixture(this, Chemicals.SulfuricAcid, 2500));
     }
 
     @Override
@@ -41,10 +41,11 @@ public class TileChemicalReactor extends TileEntity implements ITickable {
             Mixture aboveMix = contents.get(i + 1);
             for (Map.Entry<Chemical, Double> currentEntry : currentMix.getComponents().entrySet()) {
                 for (Map.Entry<Chemical, Double> aboveEntry : aboveMix.getComponents().entrySet()) {
-                    IgblonChemistry.logger.warn(aboveEntry.getKey().getSolubility(currentEntry.getKey(), temperature));
                     if (aboveEntry.getKey().getSolubility(currentEntry.getKey(), temperature) > 0) {
-                        currentMix.moveChemical(aboveMix, aboveEntry.getKey(), 10);
+                        currentMix.moveChemical(aboveMix, aboveEntry.getKey(), Math.min(0.01, aboveEntry.getValue()));
                     }
+
+
                 }
             }
         }

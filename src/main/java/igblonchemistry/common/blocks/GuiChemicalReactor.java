@@ -153,16 +153,24 @@ public class GuiChemicalReactor extends GuiContainer {
         if (mixture != null) {
             ArrayList<String> text = Lists.newArrayList();
 
+            String header = "";
+
             if (mixture.getComponents().size() == 1) {
                 if (mixture.getTemperature() > mixture.getComponents().entrySet().iterator().next().getKey().getMeltingPoint()) {
-                    text.add(TextFormatting.GOLD + "" + TextFormatting.UNDERLINE + "Liquid");
+                    header = "Liquid";
                 } else {
-                    text.add(TextFormatting.GOLD + "" + TextFormatting.UNDERLINE + "Solid");
+                    header = "Solid";
                 }
             } else {
-                text.add(TextFormatting.GOLD + "" + TextFormatting.UNDERLINE + "Mixture");
+                if (mixture.getIsAqueous()) {
+                    header = "Aqueous Mixture";
+                } else {
+                    header = "Mixture";
+                }
             }
-            text.add(TextFormatting.RESET + "Total Volume: " + TextFormatting.AQUA + IgblonUtils.roundToDigit(mixture.getTotalVolume(), 0) + " Liters");
+
+            text.add(TextFormatting.GOLD + "" + TextFormatting.UNDERLINE + header);
+            text.add(TextFormatting.RESET + "Total Volume: " + TextFormatting.AQUA + IgblonUtils.roundToDigit(mixture.getTotalVolume(), 2) + " Liters");
 
             if (mixture.getHasPH()) {
                 text.add(TextFormatting.WHITE + "pH: " + TextFormatting.GREEN + "" + IgblonUtils.roundToDigit(mixture.getPH(), 2));
@@ -177,7 +185,7 @@ public class GuiChemicalReactor extends GuiContainer {
             int i = 0;
 
             for (Map.Entry<Chemical, Double> entry : components.entrySet()) {
-                text.add(TextFormatting.RESET + entry.getKey().getName() + ": " + TextFormatting.GRAY + IgblonUtils.addCommas(IgblonUtils.roundToDigit(entry.getValue(), 2)) + " mol " + TextFormatting.DARK_GRAY + "(" + IgblonUtils.roundToDigit(individualVolumes[i], 0) + " Liters)");
+                text.add(TextFormatting.RESET + entry.getKey().getName() + ": " + TextFormatting.GRAY + IgblonUtils.roundToDigit(entry.getValue(), 2) + " mol " + TextFormatting.DARK_GRAY + "(" + IgblonUtils.roundToDigit(individualVolumes[i], 2) + " Liters)");
                 i++;
             }
 

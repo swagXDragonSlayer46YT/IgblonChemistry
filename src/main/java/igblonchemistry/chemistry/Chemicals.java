@@ -135,7 +135,7 @@ public class Chemicals {
                 .setColor(0x2d6ce0)
                 .setDensity(1000)
                 .setMolarMass(18.01)
-                .setAcidData(14, 1, 0);
+                .setAcidData(14, 1, 1);
 
         Salt = new Chemical("Salt", Sodium, 1, Chlorine, 1)
                 .addSolubilityInfo(Water, temperature -> 356.5 + 0.0035 * Math.pow(temperature - 273, 2))
@@ -145,6 +145,7 @@ public class Chemicals {
                 .setColor(0xffffff);
 
         SulfuricAcid = new Chemical("Sulfuric Acid", Hydrogen, 2, Sulfur, 1, Oxygen, 4)
+                .addSolubilityInfo(Water, temperature -> 356.5 + 0.0035 * Math.pow(temperature - 273, 2))
                 .setMeltingPoint(283)
                 .setDensity(1840)
                 .setMolarMass(98.08)

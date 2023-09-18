@@ -16,6 +16,7 @@ public class Mixture {
     private double pH = 0;
 
     private double totalVolume;
+    private boolean isAqueous;
 
     public TileChemicalReactor chemicalReactor;
 
@@ -47,8 +48,12 @@ public class Mixture {
     }
 
     public void updateVariables() {
+        isAqueous = false;
         for (Map.Entry<Chemical, Double> entry : components.entrySet()) {
             //remove chemical from chemical list if there is 0 of it
+            if (entry.getKey().compareTo(Chemicals.Water) == 0) {
+                isAqueous = true;
+            }
             if (entry.getValue() <= 0) {
                 components.remove(entry.getKey());
             }
@@ -146,9 +151,14 @@ public class Mixture {
     }
 
     public void calculatePH() {
+        if (!isAqueous) {
+            hasPH = false;
+            return;
+        }
+
         double hMolarity = 0;
         double ohMolarity = 0;
-        boolean isPureAcid = false;
+
         for (Map.Entry<Chemical, Double> entry : components.entrySet()) {
             if (entry.getKey().hasPKA()) {
                 //If acid dissociates completely
@@ -159,13 +169,14 @@ public class Mixture {
                     hMolarity += entry.getKey().getPKA() * entry.getKey().getHIons() * (entry.getValue() / totalVolume);
                     ohMolarity += entry.getKey().getPKA() * entry.getKey().getOHIons() * (entry.getValue() / totalVolume);
                 }
-                //TODO: Partial acid dissociations
+                //TODO: Partial acid dissociations for weak acids
                 //SOURCE: https://chem.libretexts.org/Bookshelves/Physical_and_Theoretical_Chemistry_Textbook_Maps/Supplemental_Modules_(Physical_and_Theoretical_Chemistry)/Acids_and_Bases/Monoprotic_Versus_Polyprotic_Acids_And_Bases/Calculating_the_pH_of_the_Solution_of_a_Polyprotic_Base%2F%2FAcid
             }
         }
 
         //pH + pOH = 14
-        if (hMolarity == 0 && hMolarity == 0) {
+        if (hMolarity == 0 && ohMolarity == 0) {
+            //No ions present, assume it is neutral, disable PH
             pH = 7;
             hasPH = false;
         } else {
@@ -188,5 +199,9 @@ public class Mixture {
 
     public boolean getHasPH() {
         return hasPH;
+    }
+
+    public boolean getIsAqueous() {
+        return isAqueous;
     }
 }
