@@ -36,6 +36,7 @@ public class Chemical implements Comparable<Chemical> {
     //measured in Joules/mol
     private double heatOfVaporization = -1;
 
+    //solubilities measured in grams of this chemical/liters of [x] solvent
     private HashMap<Chemical, SolubilityInfo> solubilityInfos = new HashMap<Chemical, SolubilityInfo>();
 
     private HashMap<Chemical, Integer> chemicalFormula = new HashMap<Chemical, Integer>();

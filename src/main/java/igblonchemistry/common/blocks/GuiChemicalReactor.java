@@ -202,7 +202,7 @@ public class GuiChemicalReactor extends GuiContainer {
             text.add(TextFormatting.AQUA + "" + TextFormatting.UNDERLINE + header);
 
             text.add(TextFormatting.RESET + "Total Volume: " + TextFormatting.AQUA + IgblonUtils.roundToDigit(gaseousMixture.getTotalVolume(), 2) + " Liters");
-            text.add(TextFormatting.RESET + "Total Pressure: " + TextFormatting.YELLOW + IgblonUtils.roundToDigit(gaseousMixture.getPressure(), 2) + " Pascals");
+            text.add(TextFormatting.RESET + "Total Pressure: " + TextFormatting.YELLOW + IgblonUtils.roundToDigit(gaseousMixture.getPressure(), 2) + " Pascals " + TextFormatting.DARK_GRAY + "(" + IgblonUtils.roundToDigit(gaseousMixture.getPressure() / 101325, 2) + " atm)");
 
             if (gaseousMixture.getComponents().size() > 0) {
                 text.add(TextFormatting.RESET + "Temperature: " + TextFormatting.RED + "" + IgblonUtils.roundToDigit(gaseousMixture.getTemperature(), 1) + " Kelvin");
@@ -216,7 +216,7 @@ public class GuiChemicalReactor extends GuiContainer {
                 int i = 0;
 
                 for (Map.Entry<Chemical, Double> entry : components.entrySet()) {
-                    text.add(TextFormatting.RESET + entry.getKey().getName() + ": " + IgblonUtils.roundToDigit(individualVolumes[i] * 100, 2) + "% " + TextFormatting.GRAY + "(" + IgblonUtils.roundToDigit(entry.getValue(), 2) + " mol) " + TextFormatting.DARK_GRAY + "(" + IgblonUtils.roundToDigit(individualPressures[i], 2) + " Pascals)");
+                    text.add(TextFormatting.RESET + entry.getKey().getName() + ": " + IgblonUtils.roundToDigit(individualVolumes[i] * 100, 2) + "% " + TextFormatting.GRAY + "(" + IgblonUtils.roundToDigit(entry.getValue(), 2) + " mol) ");
                     i++;
                 }
             }

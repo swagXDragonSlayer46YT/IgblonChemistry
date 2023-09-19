@@ -5,6 +5,7 @@ import igblonchemistry.chemistry.Chemical;
 import igblonchemistry.chemistry.Chemicals;
 import igblonchemistry.chemistry.GaseousMixture;
 import igblonchemistry.chemistry.Mixture;
+import igblonchemistry.common.ChemistryConstants;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
@@ -34,13 +35,14 @@ public class TileChemicalReactor extends TileEntity implements ITickable {
     private double reactorVolume;
     private double occupiedVolume;
 
+    private double leakageSpeed = 0.01;
+
     @Override
     public void onLoad() {
         reactorVolume = reactorWidth * reactorHeight * reactorLength / 1000000;
 
         containedGas = new GaseousMixture(this, Chemicals.Oxygen, 21);
         containedGas.addChemical(Chemicals.Nitrogen, 78);
-        containedGas.addChemical(Chemicals.Argon, 1);
 
         contents.clear();
         contents.add(new Mixture(this, Chemicals.Water, 10000));
@@ -76,6 +78,9 @@ public class TileChemicalReactor extends TileEntity implements ITickable {
         occupiedVolume = fluidVolumes;
 
         containedGas.update();
+
+        //TODO: Sealed chemical reactors will not leak
+        simulateLeakage();
     }
 
     private ItemStackHandler inputHandler = new ItemStackHandler(1) {
@@ -93,6 +98,32 @@ public class TileChemicalReactor extends TileEntity implements ITickable {
     };
 
     private CombinedInvWrapper combinedHandler = new CombinedInvWrapper(inputHandler, outputHandler);
+
+    //Balance the gases in the chemical reactor with the gases in the atmosphere, this will include things flowing in and out
+    public void simulateLeakage() {
+
+        //Balance with atmospheric gas ratios, get rid of stuff that isnt normally present in the atmosphere
+        for (Map.Entry<Chemical, Double> entry : containedGas.getComponents().entrySet()) {
+            double idealMols = 0;
+            for (Map.Entry<Chemical, Double> entry2 : ChemistryConstants.EARTH_ATMOSPHERE_COMPOSITION.entrySet()) {
+                IgblonChemistry.logger.warn(entry.getKey());
+                IgblonChemistry.logger.warn(entry.getKey().getName());
+                if (entry.getKey().compareTo(entry2.getKey()) == 0) {
+                    idealMols = ((reactorVolume - occupiedVolume) * ChemistryConstants.ATMOSPHERIC_PRESSURE * entry2.getValue()) / (ChemistryConstants.GAS_CONSTANT * containedGas.getTemperature());
+                    break;
+                }
+            }
+
+            double molDifference = idealMols - entry.getValue();
+
+            if (molDifference > 0) {
+                containedGas.addChemical(entry.getKey(), Math.max(1, molDifference * leakageSpeed));
+            }
+            if (molDifference < 0) {
+                containedGas.removeChemical(entry.getKey(), Math.max(1, molDifference * leakageSpeed));
+            }
+        }
+    }
 
     @Override
     public void readFromNBT(NBTTagCompound compound) {
