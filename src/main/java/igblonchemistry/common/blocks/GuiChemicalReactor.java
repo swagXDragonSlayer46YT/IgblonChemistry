@@ -3,6 +3,7 @@ package igblonchemistry.common.blocks;
 import com.google.common.collect.Lists;
 import igblonchemistry.IgblonChemistry;
 import igblonchemistry.chemistry.Chemical;
+import igblonchemistry.chemistry.GaseousMixture;
 import igblonchemistry.chemistry.Mixture;
 import igblonchemistry.client.renderer.RenderingUtils;
 import igblonchemistry.util.IgblonUtils;
@@ -144,17 +145,18 @@ public class GuiChemicalReactor extends GuiContainer {
     }
 
     public void getReactorTooltip(int guiLeft, int guiTop, int mouseX, int mouseY) {
-        if (mouseX < guiLeft + 56 || mouseX > guiLeft + 116 || mouseY > guiTop + 58) {
+        if (mouseX < guiLeft + 56 || mouseX > guiLeft + 116 || mouseY > guiTop + 58 || mouseY < guiTop + 8) {
             return;
         }
 
         Mixture mixture = getMixtureHovered(this.chemicalReactor, mouseY);
+        GaseousMixture gaseousMixture = this.chemicalReactor.getContainedGas();
+
+        ArrayList<String> text = Lists.newArrayList();
+
+        String header = "";
 
         if (mixture != null) {
-            ArrayList<String> text = Lists.newArrayList();
-
-            String header = "";
-
             if (mixture.getComponents().size() == 1) {
                 if (mixture.getTemperature() > mixture.getComponents().entrySet().iterator().next().getKey().getMeltingPoint()) {
                     header = "Liquid";
@@ -188,9 +190,39 @@ public class GuiChemicalReactor extends GuiContainer {
                 text.add(TextFormatting.RESET + entry.getKey().getName() + ": " + TextFormatting.GRAY + IgblonUtils.roundToDigit(entry.getValue(), 2) + " mol " + TextFormatting.DARK_GRAY + "(" + IgblonUtils.roundToDigit(individualVolumes[i], 2) + " Liters)");
                 i++;
             }
+        } else {
+            if (gaseousMixture.getComponents().size() == 0){
+                header = "Vacuum";
+            } else if (gaseousMixture.getComponents().size() == 1) {
+                header = "Gas";
+            } else {
+                header = "Gaseous Mixture";
+            }
 
-            this.drawHoveringText(text, mouseX, mouseY);
+            text.add(TextFormatting.AQUA + "" + TextFormatting.UNDERLINE + header);
+
+            text.add(TextFormatting.RESET + "Total Volume: " + TextFormatting.AQUA + IgblonUtils.roundToDigit(gaseousMixture.getTotalVolume(), 2) + " Liters");
+            text.add(TextFormatting.RESET + "Total Pressure: " + TextFormatting.YELLOW + IgblonUtils.roundToDigit(gaseousMixture.getPressure(), 2) + " Pascals");
+
+            if (gaseousMixture.getComponents().size() > 0) {
+                text.add(TextFormatting.RESET + "Temperature: " + TextFormatting.RED + "" + IgblonUtils.roundToDigit(gaseousMixture.getTemperature(), 1) + " Kelvin");
+                text.add("");
+                text.add(TextFormatting.AQUA + "" + TextFormatting.UNDERLINE + "Components");
+
+                HashMap<Chemical, Double> components = gaseousMixture.getComponents();
+                double[] individualPressures = gaseousMixture.getIndividualPressures();
+                double[] individualVolumes = gaseousMixture.getIndividualVolumes();
+
+                int i = 0;
+
+                for (Map.Entry<Chemical, Double> entry : components.entrySet()) {
+                    text.add(TextFormatting.RESET + entry.getKey().getName() + ": " + IgblonUtils.roundToDigit(individualVolumes[i] * 100, 2) + "% " + TextFormatting.GRAY + "(" + IgblonUtils.roundToDigit(entry.getValue(), 2) + " mol) " + TextFormatting.DARK_GRAY + "(" + IgblonUtils.roundToDigit(individualPressures[i], 2) + " Pascals)");
+                    i++;
+                }
+            }
         }
+
+        this.drawHoveringText(text, mouseX, mouseY);
     }
 
     @Override

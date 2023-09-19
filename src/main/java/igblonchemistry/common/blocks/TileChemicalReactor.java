@@ -25,10 +25,25 @@ public class TileChemicalReactor extends TileEntity implements ITickable {
     private ArrayList<Mixture> contents = new ArrayList<Mixture>();
     private GaseousMixture containedGas;
 
+    //measured in centimeters
+    private double reactorWidth = 1000;
+    private double reactorHeight = 1000;
+    private double reactorLength = 1000;
+
+    //measured in liters
+    private double reactorVolume;
+    private double occupiedVolume;
+
     @Override
     public void onLoad() {
+        reactorVolume = reactorWidth * reactorHeight * reactorLength / 1000000;
+
+        containedGas = new GaseousMixture(this, Chemicals.Oxygen, 21);
+        containedGas.addChemical(Chemicals.Nitrogen, 78);
+        containedGas.addChemical(Chemicals.Argon, 1);
+
         contents.clear();
-        //contents.add(new Mixture(this, Chemicals.Water, 10000));
+        contents.add(new Mixture(this, Chemicals.Water, 10000));
         contents.add(new Mixture(this, Chemicals.SulfuricAcid, 2500));
         contents.add(new Mixture(this, Chemicals.SodiumHydroxide, 2500));
     }
@@ -53,9 +68,14 @@ public class TileChemicalReactor extends TileEntity implements ITickable {
 
         }
 
+        double fluidVolumes = 0;
         for (int h = 0; h < contents.size(); h++) {
             contents.get(h).update();
+            fluidVolumes += contents.get(h).getTotalVolume();
         }
+        occupiedVolume = fluidVolumes;
+
+        containedGas.update();
     }
 
     private ItemStackHandler inputHandler = new ItemStackHandler(1) {
@@ -126,5 +146,17 @@ public class TileChemicalReactor extends TileEntity implements ITickable {
 
     public double getTemperature() {
         return temperature;
+    }
+
+    public double getOccupiedVolume() {
+        return occupiedVolume;
+    }
+
+    public double getReactorVolume() {
+        return reactorVolume;
+    }
+
+    public GaseousMixture getContainedGas() {
+        return containedGas;
     }
 }

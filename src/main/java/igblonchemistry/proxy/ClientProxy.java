@@ -25,7 +25,6 @@ public class ClientProxy extends CommonProxy {
     public void init(FMLInitializationEvent event) {
         super.init(event);
         Textures.register();
-        IgblonChemistry.logger.warn(Textures.CHEMICAL);
     }
 
     @Override

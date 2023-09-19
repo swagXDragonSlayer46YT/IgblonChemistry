@@ -130,6 +130,8 @@ public class Chemicals {
     public static Chemical SodiumSulfate;
 
     public static void register() {
+        registerElements();
+
         Water = new Chemical("Water", Hydrogen, 2, Oxygen, 1)
                 .setHeatOfVaporization(40650)
                 .setBoilingPoint(373)
@@ -175,11 +177,29 @@ public class Chemicals {
                 .setColor(0xe3e89e);
     }
 
-    public static void registerChemicals() {
+    public static void registerElements() {
         Hydrogen = new Chemical("Hydrogen")
                 .setMeltingPoint(14)
                 .setBoilingPoint(20.28)
                 .setDensity(0.08375)
                 .setMolarMass(1);
+
+        Oxygen = new Chemical("Oxygen")
+                .setMeltingPoint(54)
+                .setBoilingPoint(90)
+                .setDensity(1.42)
+                .setMolarMass(16);
+
+        Nitrogen = new Chemical("Nitrogen")
+                .setMeltingPoint(63)
+                .setBoilingPoint(77)
+                .setDensity(0.806)
+                .setMolarMass(14);
+
+        Argon = new Chemical("Argon")
+                .setMeltingPoint(84)
+                .setBoilingPoint(87)
+                .setDensity(0.535)
+                .setMolarMass(40);
     }
 }

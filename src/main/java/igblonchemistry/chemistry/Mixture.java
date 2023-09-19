@@ -12,9 +12,9 @@ import java.util.Map;
 public class Mixture {
 
     //Compound & amount of moles
-    private HashMap<Chemical, Double> components = new HashMap<Chemical, Double>();
+    protected HashMap<Chemical, Double> components = new HashMap<Chemical, Double>();
 
-    private ArrayList<Chemical> containedChemicals = new ArrayList<Chemical>();
+    protected ArrayList<Chemical> containedChemicals = new ArrayList<Chemical>();
 
     private double temperature = 293;
 
@@ -36,18 +36,7 @@ public class Mixture {
     //Simulate chemical reactions within the mixture, between the chemicals in the chemical list
     public void update() {
 
-        //Delete itself if mixture is empty
-        boolean isEmpty = true;
-
-        for (Map.Entry<Chemical, Double> entry : components.entrySet()) {
-            if (entry.getValue() > 0) {
-                isEmpty = false;
-            }
-        }
-
-        if (isEmpty) {
-            chemicalReactor.getContents().remove(this);
-        }
+        checkIfEmpty();
 
         updateVariables();
 
@@ -59,6 +48,13 @@ public class Mixture {
         runPossibleReactions();
 
         cleanComponentsList();
+    }
+
+    //Delete itself if mixture is empty
+    public void checkIfEmpty() {
+        if (components.size() == 0) {
+            chemicalReactor.getContents().remove(this);
+        }
     }
 
     //remove chemical from chemical list if there is 0 of it
@@ -214,14 +210,11 @@ public class Mixture {
 
     //Measured in Liters
     public double getTotalVolume() {
-        double[] volumes = getIndividualVolumes();
-        double totalVolume = 0;
-
-        for (double a : volumes) {
-            totalVolume += a;
-        }
-
         return totalVolume;
+    }
+
+    public void setTotalVolume(double totalVolume) {
+        this.totalVolume = totalVolume;
     }
 
     public void calculateTotalVolume() {
@@ -294,6 +287,10 @@ public class Mixture {
 
     public boolean getIsAqueous() {
         return isAqueous;
+    }
+
+    public double getTotalMols() {
+        return totalMols;
     }
 
     //Add an amount of joules to this mixture, changing its temperature based on its heat capacity
