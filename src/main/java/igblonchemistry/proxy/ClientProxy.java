@@ -3,9 +3,11 @@ package igblonchemistry.proxy;
 import igblonchemistry.IgblonChemistry;
 import igblonchemistry.client.renderer.Textures;
 import igblonchemistry.common.blocks.Blocks;
+import igblonchemistry.common.fluids.ChemistryFluids;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.item.Item;
 import net.minecraftforge.client.event.ModelRegistryEvent;
+import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -35,5 +37,11 @@ public class ClientProxy extends CommonProxy {
     @SubscribeEvent
     public static void registerModels(ModelRegistryEvent event) {
         Blocks.initModels();
+    }
+
+    @SubscribeEvent
+    public static void textureLoad(TextureStitchEvent.Pre event) {
+        IgblonChemistry.logger.warn("test");
+        ChemistryFluids.registerSprites(event.getMap());
     }
 }

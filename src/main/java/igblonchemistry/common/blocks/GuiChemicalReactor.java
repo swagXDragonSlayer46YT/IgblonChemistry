@@ -113,7 +113,7 @@ public class GuiChemicalReactor extends GuiContainer {
     }
 
     public static void drawGuiTank(int x, int y, int w, int height, float zLevel, ArrayList<Mixture> contents) {
-        FluidStack liquid = FluidRegistry.getFluidStack("water", 100);
+        FluidStack liquid = FluidRegistry.getFluidStack("chemical_fluid", 100);
         renderTiledFluid(x, y, w, 5, zLevel, liquid, contents);
         RenderingUtils.setColorRGB(0xffffff);
     }

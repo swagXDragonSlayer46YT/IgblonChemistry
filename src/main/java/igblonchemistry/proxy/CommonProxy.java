@@ -25,10 +25,10 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
 public class CommonProxy {
 
     public void preInit(FMLPreInitializationEvent event) {
-        ChemistryFluids.init();
         Chemicals.register();
         ChemistryConstants.register();
         ChemicalReactions.register();
+        ChemistryFluids.init();
     }
 
     public void init(FMLInitializationEvent event) {
