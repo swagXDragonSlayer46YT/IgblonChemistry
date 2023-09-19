@@ -10,7 +10,7 @@ public class IgblonUtils {
         return (Math.round(number * Math.pow(10, digits)) / Math.pow(10, digits));
     }
 
-    public static String addCommas(double number) {
+    public static String formatNumber(double number, int digits) {
         int wholeNumber = (int) roundToDigit(number, 0);
         double decimals = number - wholeNumber;
 
@@ -22,6 +22,6 @@ public class IgblonUtils {
             }
             newString = numberString.substring(numberString.length() - i - 1, numberString.length() - i) + newString;
         }
-        return newString + Double.toString(decimals).substring(1);
+        return newString + Double.toString(roundToDigit(decimals, digits)).substring(2);
     }
 }
