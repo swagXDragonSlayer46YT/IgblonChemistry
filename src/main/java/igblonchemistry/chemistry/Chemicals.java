@@ -182,13 +182,15 @@ public class Chemicals {
                 .setMeltingPoint(14)
                 .setBoilingPoint(20.28)
                 .setDensity(0.08375)
-                .setMolarMass(1);
+                .setMolarMass(1)
+                .setHeatCapacity(14.3);
 
         Oxygen = new Chemical("Oxygen")
                 .setMeltingPoint(54)
                 .setBoilingPoint(90)
                 .setDensity(1.42)
-                .setMolarMass(16);
+                .setMolarMass(16)
+                .setHeatCapacity(14.56);
 
         Nitrogen = new Chemical("Nitrogen")
                 .setMeltingPoint(63)

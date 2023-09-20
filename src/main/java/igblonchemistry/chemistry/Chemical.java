@@ -27,8 +27,9 @@ public class Chemical implements Comparable<Chemical> {
     private int hIons;
     private int ohIons;
 
-    //measured in Joules/moles
-    private double heatCapacity = 4.184;
+    //measured in Joules/moles * kelvin
+    //default set to water
+    private double heatCapacity = 75.38;
 
     //pKa will only apply to certain compounds
     private boolean hasPKA = false;

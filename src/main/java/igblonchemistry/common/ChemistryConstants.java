@@ -14,6 +14,9 @@ public class ChemistryConstants {
     //Composition of Earth's atmosphere, percentage
     public static HashMap<Chemical, Double> EARTH_ATMOSPHERE_COMPOSITION = new HashMap<Chemical, Double>();
 
+    //In Kelvin
+    public static double ROOM_TEMPERATURE = 293;
+
     public static void register() {
         EARTH_ATMOSPHERE_COMPOSITION.put(Chemicals.Nitrogen, 0.78);
         EARTH_ATMOSPHERE_COMPOSITION.put(Chemicals.Oxygen, 0.22);

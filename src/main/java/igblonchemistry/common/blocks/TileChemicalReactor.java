@@ -16,6 +16,7 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 import net.minecraftforge.items.wrapper.CombinedInvWrapper;
 
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -35,52 +36,56 @@ public class TileChemicalReactor extends TileEntity implements ITickable {
     private double reactorVolume;
     private double occupiedVolume;
 
-    private double leakageSpeed = 0.01;
+    private double pressureLeakageSpeed = 0.01;
+    private double heatLeakageSpeed = 0.01;
 
     @Override
     public void onLoad() {
         reactorVolume = reactorWidth * reactorHeight * reactorLength / 1000000;
 
-        containedGas = new GaseousMixture(this, Chemicals.Oxygen, 40000);
-        containedGas.addChemical(Chemicals.Nitrogen, 60000);
+        containedGas = new GaseousMixture(this, Chemicals.Oxygen, 1000, 293);
+        containedGas.addChemical(Chemicals.Nitrogen, 1000, 293);
 
         contents.clear();
-        contents.add(new Mixture(this, Chemicals.Water, 10000));
-        contents.add(new Mixture(this, Chemicals.SulfuricAcid, 2500));
-        contents.add(new Mixture(this, Chemicals.SodiumHydroxide, 2500));
+        contents.add(new Mixture(this, Chemicals.Water, 2500, 293));
+        contents.add(new Mixture(this, Chemicals.Salt, 2500, 293));
     }
 
     @Override
     public void update() {
         //Simulate interactions between mixtures
-
-        for (int i = 0; i < contents.size() - 1; i++) {
-            Mixture currentMix = contents.get(i);
-            Mixture aboveMix = contents.get(i + 1);
-
-            //Solubility stuff, will be removed since solids can mix with liquids regardless of solubility
-
-            //for (Map.Entry<Chemical, Double> currentEntry : currentMix.getComponents().entrySet()) {
-                for (Map.Entry<Chemical, Double> aboveEntry : aboveMix.getComponents().entrySet()) {
-                    //if (aboveEntry.getKey().getSolubility(currentEntry.getKey(), temperature) > 0) {
-                        currentMix.moveChemical(aboveMix, aboveEntry.getKey(), Math.min(0.2, aboveEntry.getValue()));
-                    //}
-                }
-            //}
-
-        }
+        ArrayList<Mixture> emptyMixtures = new ArrayList<Mixture>();
 
         double fluidVolumes = 0;
         for (int h = 0; h < contents.size(); h++) {
             contents.get(h).update();
             fluidVolumes += contents.get(h).getTotalVolume();
+            if (contents.get(h).isEmpty()) {
+                emptyMixtures.add(contents.get(h));
+            }
         }
+
+        for (int i = 0; i < contents.size() - 1; i++) {
+            Mixture currentMix = contents.get(i);
+            Mixture aboveMix = contents.get(i + 1);
+
+            //Consume a higher % of the above mixture as it gets smaller
+            currentMix.moveMixture(aboveMix, 1.0 / (5 * aboveMix.getTotalVolume() + 1.0));
+
+            //TODO: DETERMINE WHETHER THE BOTTOM OR TOP MIXTURE IS HOTTER, AND MOVE JOULES IN THAT DIRECTION
+        }
+
         occupiedVolume = fluidVolumes;
 
         containedGas.update();
 
         //TODO: Sealed chemical reactors will not leak
-        simulateLeakage();
+        simulatePressureLeakage();
+        simulateThermalLeakage();
+
+        for (Mixture emptyMixture : emptyMixtures) {
+            contents.remove(emptyMixture);
+        }
     }
 
     private ItemStackHandler inputHandler = new ItemStackHandler(1) {
@@ -100,14 +105,13 @@ public class TileChemicalReactor extends TileEntity implements ITickable {
     private CombinedInvWrapper combinedHandler = new CombinedInvWrapper(inputHandler, outputHandler);
 
     //Balance the gases in the chemical reactor with the gases in the atmosphere, this will include things flowing in and out
-    public void simulateLeakage() {
-
+    public void simulatePressureLeakage() {
         //Balance with atmospheric gas ratios, get rid of stuff that isnt normally present in the atmosphere
         for (Map.Entry<Chemical, Double> entry : containedGas.getComponents().entrySet()) {
             double idealMols = 0;
             for (Map.Entry<Chemical, Double> entry2 : ChemistryConstants.EARTH_ATMOSPHERE_COMPOSITION.entrySet()) {
                 if (entry.getKey().compareTo(entry2.getKey()) == 0) {
-                    idealMols = ((reactorVolume - occupiedVolume) * ChemistryConstants.ATMOSPHERIC_PRESSURE * entry2.getValue()) / (ChemistryConstants.GAS_CONSTANT * containedGas.getTemperature());
+                    idealMols = ((reactorVolume - occupiedVolume) * ChemistryConstants.ATMOSPHERIC_PRESSURE * entry2.getValue()) / (ChemistryConstants.GAS_CONSTANT * ChemistryConstants.ROOM_TEMPERATURE);
                     break;
                 }
             }
@@ -115,12 +119,22 @@ public class TileChemicalReactor extends TileEntity implements ITickable {
             double molDifference = idealMols - entry.getValue();
 
             if (molDifference > 0) {
-                containedGas.addChemical(entry.getKey(), Math.max(0.01, molDifference * leakageSpeed));
+                containedGas.addChemical(entry.getKey(), Math.max(0.01, molDifference * pressureLeakageSpeed), ChemistryConstants.ROOM_TEMPERATURE);
             }
             if (molDifference < 0) {
-                containedGas.removeChemical(entry.getKey(), Math.max(0.01, -molDifference * leakageSpeed));
+                containedGas.removeChemical(entry.getKey(), Math.max(0.01, -molDifference * pressureLeakageSpeed));
             }
         }
+    }
+
+    //Balance temperatures of reactor contents with outside world
+    public void simulateThermalLeakage() {
+        for (Mixture mixture : contents) {
+            double jouleDifference = mixture.getTotalMols() * mixture.getAverageHeatCapacity() * (ChemistryConstants.ROOM_TEMPERATURE - mixture.getTemperature());
+            mixture.addJoules(jouleDifference * heatLeakageSpeed);
+        }
+        double jouleDifference = containedGas.getTotalMols() * containedGas.getAverageHeatCapacity() * (ChemistryConstants.ROOM_TEMPERATURE - containedGas.getTemperature());
+        containedGas.addJoules(jouleDifference * heatLeakageSpeed);
     }
 
     @Override

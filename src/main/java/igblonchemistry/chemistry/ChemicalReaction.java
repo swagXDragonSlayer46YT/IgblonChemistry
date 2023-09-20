@@ -11,6 +11,9 @@ public class ChemicalReaction {
     //measured in Joules per reaction done
     private double enthalpyChange;
 
+    //measured in mols per tick
+    private double reactionSpeed;
+
     public ChemicalReaction() {
         ChemicalReactions.chemicalReactions.add(this);
     }
@@ -44,5 +47,10 @@ public class ChemicalReaction {
 
     public double getEnthalpyChange() {
         return enthalpyChange;
+    }
+
+    public double getReactionSpeed() {
+        //TODO: RETURN DIFFERENT VALUES BASED ON EQUILIBRIUM, TEMPERATURE, ETC
+        return reactionSpeed;
     }
 }

@@ -26,7 +26,6 @@ public class ClientProxy extends CommonProxy {
     @Override
     public void init(FMLInitializationEvent event) {
         super.init(event);
-        Textures.register();
     }
 
     @Override
@@ -41,7 +40,6 @@ public class ClientProxy extends CommonProxy {
 
     @SubscribeEvent
     public static void textureLoad(TextureStitchEvent.Pre event) {
-        IgblonChemistry.logger.warn("test");
-        ChemistryFluids.registerSprites(event.getMap());
+        Textures.registerSprites(event.getMap());
     }
 }

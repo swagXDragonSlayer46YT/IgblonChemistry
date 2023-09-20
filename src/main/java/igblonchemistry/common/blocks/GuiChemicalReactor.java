@@ -96,8 +96,8 @@ public class GuiChemicalReactor extends GuiContainer {
         tessellator.draw();
     }
 
-    public static void renderTiledFluid(int x, int y, int width, int height, float depth, FluidStack fluidStack, ArrayList<Mixture> contents) {
-        TextureAtlasSprite fluidSprite = mc.getTextureMapBlocks().getAtlasSprite(fluidStack.getFluid().getStill(fluidStack).toString());
+    public static void renderTiledFluid(int x, int y, int width, int height, float depth, ArrayList<Mixture> contents) {
+        TextureAtlasSprite fluidSprite = mc.getTextureMapBlocks().getAtlasSprite(IgblonChemistry.MODID + ":blocks/fluids/fluid");
 
         int y2 = y;
 
@@ -107,14 +107,13 @@ public class GuiChemicalReactor extends GuiContainer {
             //1 Pixel = 20 liters, this will vary reactor by reactor
             int h = (int) Math.ceil(contents.get(i).getTotalVolume() / 20);
 
-            renderTiledTexture(x, y2 - h, width, h, depth, fluidSprite, fluidStack.getFluid().isGaseous(fluidStack));
+            renderTiledTexture(x, y2 - h, width, h, depth, fluidSprite, false);
             y2 -= h;
         }
     }
 
     public static void drawGuiTank(int x, int y, int w, int height, float zLevel, ArrayList<Mixture> contents) {
-        FluidStack liquid = FluidRegistry.getFluidStack("chemical_fluid", 100);
-        renderTiledFluid(x, y, w, 5, zLevel, liquid, contents);
+        renderTiledFluid(x, y, w, 5, zLevel, contents);
         RenderingUtils.setColorRGB(0xffffff);
     }
 
@@ -164,11 +163,7 @@ public class GuiChemicalReactor extends GuiContainer {
                     header = "Solid";
                 }
             } else {
-                if (mixture.getIsAqueous()) {
-                    header = "Aqueous Mixture";
-                } else {
-                    header = "Mixture";
-                }
+                header = "Mixture";
             }
 
             text.add(TextFormatting.GOLD + "" + TextFormatting.UNDERLINE + header);
@@ -202,7 +197,7 @@ public class GuiChemicalReactor extends GuiContainer {
             text.add(TextFormatting.AQUA + "" + TextFormatting.UNDERLINE + header);
 
             text.add(TextFormatting.RESET + "Total Volume: " + TextFormatting.AQUA + IgblonUtils.roundToDigit(gaseousMixture.getTotalVolume(), 2) + " Liters");
-            text.add(TextFormatting.RESET + "Total Pressure: " + TextFormatting.YELLOW + IgblonUtils.formatNumber(gaseousMixture.getPressure(), 1) + " Pascals " + TextFormatting.DARK_GRAY + "(" + IgblonUtils.roundToDigit(gaseousMixture.getPressure() / 101325, 2) + " atm)");
+            text.add(TextFormatting.RESET + "Total Pressure: " + TextFormatting.YELLOW + IgblonUtils.roundToDigit(gaseousMixture.getPressure(), 1) + " Pascals " + TextFormatting.DARK_GRAY + "(" + IgblonUtils.roundToDigit(gaseousMixture.getPressure() / 101325, 2) + " atm)");
 
             if (gaseousMixture.getComponents().size() > 0) {
                 text.add(TextFormatting.RESET + "Temperature: " + TextFormatting.RED + "" + IgblonUtils.roundToDigit(gaseousMixture.getTemperature(), 1) + " Kelvin");

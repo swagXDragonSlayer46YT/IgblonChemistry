@@ -13,25 +13,14 @@ public class GaseousMixture extends Mixture {
 
     private boolean isVacuum;
 
-    public GaseousMixture(TileChemicalReactor chemicalReactor, Chemical chemical, double amount) {
-        super(chemicalReactor, chemical, amount);
+    public GaseousMixture(TileChemicalReactor chemicalReactor, Chemical chemical, double amount, double temperature) {
+        super(chemicalReactor, chemical, amount, temperature);
     }
 
     @Override
     public void update() {
 
-        //Delete itself if mixture is empty
-        boolean isEmpty = true;
-
-        for (Map.Entry<Chemical, Double> entry : super.components.entrySet()) {
-            if (entry.getValue() > 0) {
-                isEmpty = false;
-            }
-        }
-
-        if (isEmpty) {
-            chemicalReactor.getContents().remove(this);
-        }
+        checkIfVacuum();
 
         updateVariables();
 
@@ -44,9 +33,28 @@ public class GaseousMixture extends Mixture {
         cleanComponentsList();
     }
 
+    @Override
+    public void updateVariables() {
+        double totalHeatCapacity = 0;
+        double totalMoles = 0;
+
+        for (Map.Entry<Chemical, Double> entry : components.entrySet()) {
+            totalHeatCapacity += entry.getKey().getHeatCapacity() * entry.getValue();
+            totalMoles += entry.getValue();
+        }
+
+        setTotalMols(totalMoles);
+        setAverageHeatCapacity(totalHeatCapacity / totalMoles);
+        setTemperature(293);
+    }
+
     //Rather than removing itself when empty, it will simply be a vacuum
     @Override
-    public void checkIfEmpty() {
+    public boolean isEmpty() {
+        return false;
+    }
+
+    public void checkIfVacuum() {
         if (components.size() == 0) {
             isVacuum = true;
         } else {

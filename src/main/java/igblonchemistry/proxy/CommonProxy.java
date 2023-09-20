@@ -28,7 +28,6 @@ public class CommonProxy {
         Chemicals.register();
         ChemistryConstants.register();
         ChemicalReactions.register();
-        ChemistryFluids.init();
     }
 
     public void init(FMLInitializationEvent event) {

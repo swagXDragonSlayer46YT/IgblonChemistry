@@ -9,6 +9,5 @@ public class ChemistryFluid extends Fluid {
 
     public ChemistryFluid(String fluidName, ResourceLocation still) {
         super(fluidName, still, still);
-        ChemistryFluids.locationsToRegister.add(still);
     }
 }

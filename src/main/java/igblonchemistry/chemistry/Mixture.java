@@ -16,7 +16,11 @@ public class Mixture {
 
     protected ArrayList<Chemical> containedChemicals = new ArrayList<Chemical>();
 
-    private double temperature = 293;
+    //In Kelvin
+    private double temperature;
+
+    //In Joules
+    private double energyContained;
 
     private boolean hasPH;
     private double pH = 0;
@@ -28,21 +32,22 @@ public class Mixture {
 
     public TileChemicalReactor chemicalReactor;
 
-    public Mixture(TileChemicalReactor chemicalReactor, Chemical chemical, double amount) {
+    public Mixture(TileChemicalReactor chemicalReactor, Chemical chemical, double amount, double temperature) {
         components.put(chemical, amount);
+        averageHeatCapacity = chemical.getHeatCapacity();
+        energyContained = averageHeatCapacity * temperature * amount;
+        this.temperature = temperature;
         this.chemicalReactor = chemicalReactor;
     }
 
     //Simulate chemical reactions within the mixture, between the chemicals in the chemical list
     public void update() {
-
-        checkIfEmpty();
-
         updateVariables();
 
         containedChemicals = new ArrayList<>(components.keySet());
 
         calculatePH();
+
         calculateTotalVolume();
 
         runPossibleReactions();
@@ -51,9 +56,11 @@ public class Mixture {
     }
 
     //Delete itself if mixture is empty
-    public void checkIfEmpty() {
+    public boolean isEmpty() {
         if (components.size() == 0) {
-            chemicalReactor.getContents().remove(this);
+            return true;
+        } else {
+            return false;
         }
     }
 
@@ -85,7 +92,7 @@ public class Mixture {
                     removeChemical(entry.getKey(), entry.getValue() * reactionAmount);
                 }
                 for (Map.Entry<Chemical, Integer> entry : chemicalReaction.getProducts().entrySet()) {
-                    addChemical(entry.getKey(), entry.getValue() * reactionAmount);
+                    addChemical(entry.getKey(), entry.getValue() * reactionAmount, temperature);
                 }
                 addJoules(-chemicalReaction.getEnthalpyChange() * reactionAmount);
             }
@@ -127,47 +134,57 @@ public class Mixture {
             totalHeatCapacity += entry.getKey().getHeatCapacity() * entry.getValue();
             totalMoles += entry.getValue();
         }
+
         totalMols = totalMoles;
         averageHeatCapacity = totalHeatCapacity / totalMoles;
+        temperature = (energyContained / averageHeatCapacity) / totalMols;
     }
 
-    public Mixture addChemical(Chemical chemical, double amount) {
+    public void addChemical(Chemical chemical, double amount, double temperature) {
+        energyContained += amount * temperature * chemical.getHeatCapacity();
+
         for (Map.Entry<Chemical, Double> entry : components.entrySet()) {
             if (entry.getKey().compareTo(chemical) == 0) {
                 entry.setValue(entry.getValue() + amount);
-                return this;
+                return;
             }
         }
 
         this.components.put(chemical, amount);
-        return this;
     }
 
-    public Mixture removeChemical(Chemical chemical, double amount) {
+    public boolean removeChemical(Chemical chemical, double amount) {
         for (Map.Entry<Chemical, Double> entry : components.entrySet()) {
             if (entry.getKey().compareTo(chemical) == 0) {
                 entry.setValue(Math.max(entry.getValue() - amount, 0));
-                return this;
+                energyContained -= amount * temperature * chemical.getHeatCapacity();
+                return true;
             }
         }
 
-        return this;
+        return false;
     }
 
-    public Mixture moveChemical(Mixture mixtureFrom, Chemical chemicalToMove, double amount) {
-        //Add an amount to this mixture, remove the same amount from another mixture
-        addChemical(chemicalToMove, amount);
+    //moves a specific chemical from a mixture
+    public boolean moveChemical(Mixture mixtureFrom, Chemical chemicalToMove, double amount) {
+        if (mixtureFrom.removeChemical(chemicalToMove, amount)) {
+            addChemical(chemicalToMove, amount, mixtureFrom.getTemperature());
+            return true;
+        }
 
+        return false;
+    }
+
+    //moves all chemicals from a mixture, proportionally
+    public Mixture moveMixture(Mixture mixtureFrom, double percentage) {
+        //IgblonChemistry.logger.warn(percentage);
         for (Map.Entry<Chemical, Double> entry : mixtureFrom.getComponents().entrySet()) {
-            if (entry.getKey().compareTo(chemicalToMove) == 0) {
-                entry.setValue(entry.getValue() - amount);
+            if (entry.getValue() * percentage > 0.01) {
+                moveChemical(mixtureFrom, entry.getKey(), entry.getValue() * percentage);
+            } else {
+                moveChemical(mixtureFrom, entry.getKey(), entry.getValue());
             }
         }
-        return this;
-    }
-
-    public Mixture moveChemical(Mixture mixtureFrom, double percentage) {
-        //THIS FUNCTION SHOULD MOVE PERCENTAGES OF AN ENTIRE MIXTURE AT ONCE
         return this;
     }
 
@@ -295,6 +312,26 @@ public class Mixture {
 
     //Add an amount of joules to this mixture, changing its temperature based on its heat capacity
     public void addJoules(double joules) {
-        temperature += (joules / averageHeatCapacity) / totalMols;
+        energyContained += joules;
+    }
+
+    public double getJoules() {
+        return energyContained;
+    }
+
+    public double getAverageHeatCapacity() {
+        return averageHeatCapacity;
+    }
+
+    public void setTotalMols(double totalMols) {
+        this.totalMols = totalMols;
+    }
+
+    public void setAverageHeatCapacity(double averageHeatCapacity) {
+        this.averageHeatCapacity = averageHeatCapacity;
+    }
+
+    public void setTemperature(double temperature) {
+        this.temperature = temperature;
     }
 }
