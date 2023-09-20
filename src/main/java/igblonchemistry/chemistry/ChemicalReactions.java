@@ -23,6 +23,8 @@ public class ChemicalReactions {
                 .addReactant(Chemicals.SulfuricAcid, 1)
                 .addProduct(Chemicals.Water, 2)
                 .addProduct(Chemicals.SodiumSulfate, 1)
+                .setReactionSpeed(10)
+                .setChemicalReactionType(ChemicalReactionTypes.INSTANT)
                 .setEnthalpyChange(-68600);
     }
 }

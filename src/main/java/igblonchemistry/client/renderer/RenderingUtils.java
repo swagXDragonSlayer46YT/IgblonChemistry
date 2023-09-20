@@ -16,7 +16,11 @@ public class RenderingUtils {
     }
 
     public static int RGBtoHex(int r, int g, int b) {
-        return Integer.parseInt(String.format("%02x%02x%02x", r, g, b), 16);
+        try {
+            return Integer.parseInt(String.format("%02x%02x%02x", r, g, b), 16);
+        } catch(NumberFormatException e) {
+            return 0xffffff;
+        }
     }
 
     public static void setColorRGB(int color, int transparency) {

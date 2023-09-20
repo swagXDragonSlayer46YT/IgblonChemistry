@@ -102,7 +102,7 @@ public class GuiChemicalReactor extends GuiContainer {
         int y2 = y;
 
         for (int i = 0; i < contents.size(); i++) {
-            RenderingUtils.setColorRGB(contents.get(i).getColorAverage());
+            RenderingUtils.setColorRGB(contents.get(i).getColor());
 
             //1 Pixel = 20 liters, this will vary reactor by reactor
             int h = (int) Math.ceil(contents.get(i).getTotalVolume() / 20);

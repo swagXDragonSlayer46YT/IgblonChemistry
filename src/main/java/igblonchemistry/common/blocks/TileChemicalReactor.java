@@ -37,7 +37,7 @@ public class TileChemicalReactor extends TileEntity implements ITickable {
     private double occupiedVolume;
 
     private double pressureLeakageSpeed = 0.01;
-    private double heatLeakageSpeed = 0.01;
+    private double heatLeakageSpeed = 0.001;
 
     @Override
     public void onLoad() {
@@ -47,8 +47,12 @@ public class TileChemicalReactor extends TileEntity implements ITickable {
         containedGas.addChemical(Chemicals.Nitrogen, 1000, 293);
 
         contents.clear();
-        contents.add(new Mixture(this, Chemicals.Water, 2500, 293));
+        contents.add(new Mixture(this, Chemicals.SulfuricAcid, 2500, 293));
+        contents.add(new Mixture(this, Chemicals.SodiumHydroxide, 2500, 293));
         contents.add(new Mixture(this, Chemicals.Salt, 2500, 293));
+        contents.add(new Mixture(this, Chemicals.SodiumHydroxide, 2500, 293));
+        contents.add(new Mixture(this, Chemicals.SulfuricAcid, 2500, 293));
+        contents.add(new Mixture(this, Chemicals.Water, 2500, 293));
     }
 
     @Override
@@ -70,7 +74,7 @@ public class TileChemicalReactor extends TileEntity implements ITickable {
             Mixture aboveMix = contents.get(i + 1);
 
             //Consume a higher % of the above mixture as it gets smaller
-            currentMix.moveMixture(aboveMix, 1.0 / (5 * aboveMix.getTotalVolume() + 1.0));
+            currentMix.moveMixture(aboveMix, Math.min(1.0, 1.0 / (aboveMix.getTotalVolume() + 1.0)));
 
             //TODO: DETERMINE WHETHER THE BOTTOM OR TOP MIXTURE IS HOTTER, AND MOVE JOULES IN THAT DIRECTION
         }

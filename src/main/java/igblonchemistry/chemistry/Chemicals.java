@@ -169,7 +169,7 @@ public class Chemicals {
                 .setAcidData(-3, 0, 1);
 
         SodiumSulfate = new Chemical("Sodium Sulfate", Sodium, 2, Sulfur, 1, Oxygen, 4)
-                .addSolubilityInfo(Water, temperature -> temperature < 308 ? 49 + 0.4 * Math.pow(temperature - 273, 2) : temperature > 308 ? 539 - 2 * (temperature - 308) : 539)
+                .addSolubilityInfo(Water, temperature -> temperature < 308 ? 49 + 0.4 * Math.pow(temperature - 273, 2) : 539 - 2 * (temperature - 308))
                 .setMeltingPoint(1157)
                 .setDensity(2660)
                 .setMolarMass(142)
@@ -203,5 +203,12 @@ public class Chemicals {
                 .setBoilingPoint(87)
                 .setDensity(0.535)
                 .setMolarMass(40);
+
+        Mercury = new Chemical("Mercury")
+                .setMeltingPoint(234)
+                .setBoilingPoint(630)
+                .setDensity(13500)
+                .setColor(0x2e2c2c)
+                .setMolarMass(200.6);
     }
 }

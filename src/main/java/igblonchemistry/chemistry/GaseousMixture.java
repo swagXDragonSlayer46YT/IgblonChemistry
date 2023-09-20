@@ -45,7 +45,6 @@ public class GaseousMixture extends Mixture {
 
         setTotalMols(totalMoles);
         setAverageHeatCapacity(totalHeatCapacity / totalMoles);
-        setTemperature(293);
     }
 
     //Rather than removing itself when empty, it will simply be a vacuum

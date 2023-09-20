@@ -14,6 +14,8 @@ public class ChemicalReaction {
     //measured in mols per tick
     private double reactionSpeed;
 
+    private ChemicalReactionTypes chemicalReactionType;
+
     public ChemicalReaction() {
         ChemicalReactions.chemicalReactions.add(this);
     }
@@ -52,5 +54,19 @@ public class ChemicalReaction {
     public double getReactionSpeed() {
         //TODO: RETURN DIFFERENT VALUES BASED ON EQUILIBRIUM, TEMPERATURE, ETC
         return reactionSpeed;
+    }
+
+    public ChemicalReaction setReactionSpeed(double reactionSpeed) {
+        this.reactionSpeed = reactionSpeed;
+        return this;
+    }
+
+    public ChemicalReactionTypes getReactionType() {
+        return chemicalReactionType;
+    }
+
+    public ChemicalReaction setChemicalReactionType(ChemicalReactionTypes reactionType) {
+        this.chemicalReactionType = reactionType;
+        return this;
     }
 }

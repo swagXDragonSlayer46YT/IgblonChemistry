@@ -30,6 +30,8 @@ public class Mixture {
     private double totalMols;
     private boolean isAqueous;
 
+    private int color;
+
     public TileChemicalReactor chemicalReactor;
 
     public Mixture(TileChemicalReactor chemicalReactor, Chemical chemical, double amount, double temperature) {
@@ -42,17 +44,19 @@ public class Mixture {
 
     //Simulate chemical reactions within the mixture, between the chemicals in the chemical list
     public void update() {
-        updateVariables();
+        cleanComponentsList();
+
+        calculateColorAverage();
 
         containedChemicals = new ArrayList<>(components.keySet());
+
+        updateVariables();
 
         calculatePH();
 
         calculateTotalVolume();
 
         runPossibleReactions();
-
-        cleanComponentsList();
     }
 
     //Delete itself if mixture is empty
@@ -85,8 +89,7 @@ public class Mixture {
             boolean canRun = checkIfReactionPossible(chemicalReaction);
 
             if (canRun) {
-                //TODO: Calculate how much of the reaction should occur, if necessary, find limiting factor
-                double reactionAmount = 0.2;
+                double reactionAmount = 1;
 
                 for (Map.Entry<Chemical, Integer> entry : chemicalReaction.getReactants().entrySet()) {
                     removeChemical(entry.getKey(), entry.getValue() * reactionAmount);
@@ -192,10 +195,10 @@ public class Mixture {
         return components;
     }
 
-    public int getColorAverage() {
+    public void calculateColorAverage() {
         if (components.size() == 1) {
             Map.Entry<Chemical, Double> entry = components.entrySet().iterator().next();
-            return entry.getKey().getColor();
+            color = entry.getKey().getColor();
         } else {
             int rSum = 0;
             int gSum = 0;
@@ -209,8 +212,16 @@ public class Mixture {
                 totalMols += entry.getValue();
             }
 
-            return RenderingUtils.RGBtoHex(rSum / totalMols, gSum / totalMols, bSum / totalMols);
+            if (totalMols <= 0) {
+                totalMols = 1;
+            }
+
+            color = RenderingUtils.RGBtoHex(Math.min(rSum / totalMols, 255), Math.min(gSum / totalMols, 255), Math.min(bSum / totalMols, 255));
         }
+    }
+
+    public int getColor() {
+        return color;
     }
 
     public double[] getIndividualVolumes() {
