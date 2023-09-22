@@ -19,18 +19,19 @@ public class GaseousMixture extends Mixture {
 
     @Override
     public void update() {
+        cleanComponentsList();
 
         checkIfVacuum();
 
-        updateVariables();
-
         containedChemicals = new ArrayList<>(components.keySet());
 
-        calculateTotalVolume();
-        calculateTotalPressures();
-        runPossibleReactions();
+        updateVariables();
 
-        cleanComponentsList();
+        calculateTotalVolume();
+
+        calculateTotalPressures();
+
+        runPossibleReactions();
     }
 
     @Override
@@ -45,6 +46,7 @@ public class GaseousMixture extends Mixture {
 
         setTotalMols(totalMoles);
         setAverageHeatCapacity(totalHeatCapacity / totalMoles);
+        setTemperature((getEnergyContained() / getAverageHeatCapacity()) / totalMoles);
     }
 
     //Rather than removing itself when empty, it will simply be a vacuum

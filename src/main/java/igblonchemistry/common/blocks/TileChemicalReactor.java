@@ -44,15 +44,19 @@ public class TileChemicalReactor extends TileEntity implements ITickable {
         reactorVolume = reactorWidth * reactorHeight * reactorLength / 1000000;
 
         containedGas = new GaseousMixture(this, Chemicals.Oxygen, 1000, 293);
-        containedGas.addChemical(Chemicals.Nitrogen, 1000, 293);
+        containedGas.addChemical(Chemicals.Nitrogen, 2000, 293);
 
         contents.clear();
+
+        /*
         contents.add(new Mixture(this, Chemicals.SulfuricAcid, 2500, 293));
         contents.add(new Mixture(this, Chemicals.SodiumHydroxide, 2500, 293));
         contents.add(new Mixture(this, Chemicals.Salt, 2500, 293));
         contents.add(new Mixture(this, Chemicals.SodiumHydroxide, 2500, 293));
         contents.add(new Mixture(this, Chemicals.SulfuricAcid, 2500, 293));
         contents.add(new Mixture(this, Chemicals.Water, 2500, 293));
+
+         */
     }
 
     @Override
@@ -111,11 +115,17 @@ public class TileChemicalReactor extends TileEntity implements ITickable {
     //Balance the gases in the chemical reactor with the gases in the atmosphere, this will include things flowing in and out
     public void simulatePressureLeakage() {
         //Balance with atmospheric gas ratios, get rid of stuff that isnt normally present in the atmosphere
+        for (Map.Entry<Chemical, Double> entry2 : ChemistryConstants.EARTH_ATMOSPHERE_COMPOSITION.entrySet()) {
+            if (containedGas.findChemical(entry2.getKey()) == 0) {
+                containedGas.addChemical(entry2.getKey(), 1, ChemistryConstants.ROOM_TEMPERATURE);
+            }
+        }
+
         for (Map.Entry<Chemical, Double> entry : containedGas.getComponents().entrySet()) {
             double idealMols = 0;
             for (Map.Entry<Chemical, Double> entry2 : ChemistryConstants.EARTH_ATMOSPHERE_COMPOSITION.entrySet()) {
                 if (entry.getKey().compareTo(entry2.getKey()) == 0) {
-                    idealMols = ((reactorVolume - occupiedVolume) * ChemistryConstants.ATMOSPHERIC_PRESSURE * entry2.getValue()) / (ChemistryConstants.GAS_CONSTANT * ChemistryConstants.ROOM_TEMPERATURE);
+                    idealMols = ((reactorVolume - occupiedVolume) * ChemistryConstants.ATMOSPHERIC_PRESSURE * entry2.getValue()) / (ChemistryConstants.GAS_CONSTANT * containedGas.getTemperature());
                     break;
                 }
             }

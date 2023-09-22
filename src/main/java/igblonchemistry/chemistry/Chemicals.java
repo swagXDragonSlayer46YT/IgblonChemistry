@@ -128,6 +128,7 @@ public class Chemicals {
     public static Chemical SulfuricAcid;
     public static Chemical SodiumHydroxide;
     public static Chemical SodiumSulfate;
+    public static Chemical HydrogenChloride;
 
     public static void register() {
         registerElements();
@@ -175,6 +176,14 @@ public class Chemicals {
                 .setMolarMass(142)
                 .setHeatCapacity(128.2)
                 .setColor(0xe3e89e);
+
+        HydrogenChloride = new Chemical("Hydrogen Chloride", Hydrogen, 1, Chlorine, 1)
+                .addSolubilityInfo(Water, temperature -> 800 - 4 * (temperature - 273))
+                .setMeltingPoint(158.9)
+                .setDensity(1.49)
+                .setMolarMass(36.46)
+                .setHeatCapacity(29.58)
+                .setColor(0x95baa4);
     }
 
     public static void registerElements() {
@@ -197,6 +206,13 @@ public class Chemicals {
                 .setBoilingPoint(77)
                 .setDensity(0.806)
                 .setMolarMass(14);
+
+        Chlorine = new Chemical("Chlorine")
+                .setMeltingPoint(172)
+                .setBoilingPoint(239)
+                .setDensity(3.214)
+                .setMolarMass(35.5)
+                .setHeatCapacity(16.89);
 
         Argon = new Chemical("Argon")
                 .setMeltingPoint(84)

@@ -89,7 +89,16 @@ public class Mixture {
             boolean canRun = checkIfReactionPossible(chemicalReaction);
 
             if (canRun) {
-                double reactionAmount = 1;
+                double reactionAmount = 0;
+
+                if (chemicalReaction.getReactionType().equals(ChemicalReactionTypes.INSTANT)) {
+                    //Set reaction amount per tick to 1% of the limiting factor of the reaction
+                    for (Map.Entry<Chemical, Integer> entry : chemicalReaction.getReactants().entrySet()) {
+                        if (components.get(entry.getKey()) / entry.getValue() < reactionAmount || reactionAmount == 0) {
+                            reactionAmount = components.get(entry.getKey()) > 0.01 ? (components.get(entry.getKey()) / entry.getValue()) / 100 : components.get(entry.getKey());
+                        }
+                    }
+                }
 
                 for (Map.Entry<Chemical, Integer> entry : chemicalReaction.getReactants().entrySet()) {
                     removeChemical(entry.getKey(), entry.getValue() * reactionAmount);
@@ -141,6 +150,13 @@ public class Mixture {
         totalMols = totalMoles;
         averageHeatCapacity = totalHeatCapacity / totalMoles;
         temperature = (energyContained / averageHeatCapacity) / totalMols;
+    }
+
+    public double findChemical(Chemical chemical) {
+        if (components.get(chemical) != null) {
+            return components.get(chemical);
+        }
+        return 0;
     }
 
     public void addChemical(Chemical chemical, double amount, double temperature) {
@@ -243,6 +259,10 @@ public class Mixture {
 
     public void setTotalVolume(double totalVolume) {
         this.totalVolume = totalVolume;
+    }
+
+    public double getEnergyContained() {
+        return energyContained;
     }
 
     public void calculateTotalVolume() {
