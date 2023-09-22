@@ -57,6 +57,12 @@ public class Mixture {
         calculateTotalVolume();
 
         runPossibleReactions();
+
+        precipitateSolids();
+    }
+
+    public void precipitateSolids() {
+
     }
 
     //Delete itself if mixture is empty
@@ -157,6 +163,25 @@ public class Mixture {
             return components.get(chemical);
         }
         return 0;
+    }
+
+    public double findSolubilityLimit(Chemical chemical) {
+        //Finds the total amount of chemical that can be held in this mixture
+        HashMap<Chemical, SolubilityInfo> solubilityInfos = chemical.getSolubilityInfos();
+
+        if (solubilityInfos.isEmpty()) {
+            return 0;
+        } else {
+            double solubilityTotal = 0;
+            for (Map.Entry<Chemical, SolubilityInfo> entry : solubilityInfos.entrySet()) {
+                for (Map.Entry<Chemical, Double> entry2 : components.entrySet()) {
+                    if (entry.getKey().compareTo(entry2.getKey()) == 0) {
+                        solubilityTotal += entry.getValue().calculateSolubility(temperature) * entry2.getValue();
+                    }
+                }
+            }
+            return solubilityTotal;
+        }
     }
 
     public void addChemical(Chemical chemical, double amount, double temperature) {

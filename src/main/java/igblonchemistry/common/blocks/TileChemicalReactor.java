@@ -78,6 +78,13 @@ public class TileChemicalReactor extends TileEntity implements ITickable {
             Mixture aboveMix = contents.get(i + 1);
 
             //Consume a higher % of the above mixture as it gets smaller
+            //TODO: FOLLOWING INTERACTIONS:
+            /*
+                LIQUID-LIQUID: IF LIQUIDS ARE IMMISCIBLE, SORT BY DENSITY, OTHERWISE MIX
+                LIQUID-SOLID: IF SOLID IS INSOLUBLE SORT BY DENSITY, IF SOLID IS SOLUBLE, DISSOLVE UNTIL LIMIT AND THEN SORT BY DENSITY
+                LIQUID-GAS: TOP FLUID WILL ABSORB SOLUBLE GASES FROM THE CONTAINED GASES
+                SOLID-SOLID: NO INTERACTION UNLESS REACTOR IS MIXING
+             */
             currentMix.moveMixture(aboveMix, Math.min(1.0, 1.0 / (aboveMix.getTotalVolume() + 1.0)));
 
             //TODO: DETERMINE WHETHER THE BOTTOM OR TOP MIXTURE IS HOTTER, AND MOVE JOULES IN THAT DIRECTION

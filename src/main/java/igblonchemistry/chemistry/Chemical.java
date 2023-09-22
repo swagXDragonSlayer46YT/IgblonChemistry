@@ -56,6 +56,10 @@ public class Chemical implements Comparable<Chemical> {
         }
     }
 
+    public HashMap<Chemical, SolubilityInfo> getSolubilityInfos() {
+        return solubilityInfos;
+    }
+
     public Chemical registerImmiscibility(Chemical... chemicals) {
         immiscibleWith.addAll(Arrays.asList(chemicals));
         return this;
