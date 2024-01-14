@@ -97,17 +97,23 @@ public class GuiChemicalReactor extends GuiContainer {
     }
 
     public static void renderTiledFluid(int x, int y, int width, int height, float depth, ArrayList<Mixture> contents) {
-        TextureAtlasSprite fluidSprite = mc.getTextureMapBlocks().getAtlasSprite(IgblonChemistry.MODID + ":blocks/fluids/fluid");
-
         int y2 = y;
 
         for (int i = 0; i < contents.size(); i++) {
             RenderingUtils.setColorRGB(contents.get(i).getColor());
 
+            TextureAtlasSprite spriteToUse;
+
+            if (contents.get(i).getIsMostlySolid()) {
+                spriteToUse = mc.getTextureMapBlocks().getAtlasSprite(IgblonChemistry.MODID + ":blocks/fluids/dust");
+            } else {
+                spriteToUse = mc.getTextureMapBlocks().getAtlasSprite(IgblonChemistry.MODID + ":blocks/fluids/fluid");
+            }
+
             //1 Pixel = 20 liters, this will vary reactor by reactor
             int h = (int) Math.ceil(contents.get(i).getTotalVolume() / 20);
 
-            renderTiledTexture(x, y2 - h, width, h, depth, fluidSprite, false);
+            renderTiledTexture(x, y2 - h, width, h, depth, spriteToUse, false);
             y2 -= h;
         }
     }
@@ -169,20 +175,16 @@ public class GuiChemicalReactor extends GuiContainer {
             text.add(TextFormatting.GOLD + "" + TextFormatting.UNDERLINE + header);
             text.add(TextFormatting.RESET + "Total Volume: " + TextFormatting.AQUA + IgblonUtils.roundToDigit(mixture.getTotalVolume(), 2) + " Liters");
 
-            if (mixture.getHasPH()) {
-                text.add(TextFormatting.WHITE + "pH: " + TextFormatting.GREEN + "" + IgblonUtils.roundToDigit(mixture.getPH(), 2));
-            }
-
             text.add(TextFormatting.WHITE + "Temperature: " + TextFormatting.RED + "" + IgblonUtils.roundToDigit(mixture.getTemperature(), 1) + " Kelvin");
             text.add("");
             text.add(TextFormatting.GOLD + "" + TextFormatting.UNDERLINE + "Components");
 
             HashMap<Chemical, Double> components = mixture.getComponents();
-            double[] individualVolumes = mixture.getIndividualVolumes();
+
             int i = 0;
 
             for (Map.Entry<Chemical, Double> entry : components.entrySet()) {
-                text.add(TextFormatting.RESET + entry.getKey().getName() + ": " + TextFormatting.GRAY + IgblonUtils.roundToDigit(entry.getValue(), 2) + " mol " + TextFormatting.DARK_GRAY + "(" + IgblonUtils.roundToDigit(individualVolumes[i], 2) + " Liters)");
+                text.add(TextFormatting.RESET + entry.getKey().getName() + ": " + TextFormatting.GRAY + IgblonUtils.roundToDigit(entry.getValue(), 2) + " mol " + TextFormatting.DARK_GRAY + "(" + IgblonUtils.roundToDigit(mixture.getVolumeOfIndividualChemical(entry.getKey()), 2) + " Liters)");
                 i++;
             }
         } else {
@@ -205,13 +207,11 @@ public class GuiChemicalReactor extends GuiContainer {
                 text.add(TextFormatting.AQUA + "" + TextFormatting.UNDERLINE + "Components");
 
                 HashMap<Chemical, Double> components = gaseousMixture.getComponents();
-                double[] individualPressures = gaseousMixture.getIndividualPressures();
-                double[] individualVolumes = gaseousMixture.getIndividualVolumes();
 
                 int i = 0;
 
                 for (Map.Entry<Chemical, Double> entry : components.entrySet()) {
-                    text.add(TextFormatting.RESET + entry.getKey().getName() + ": " + IgblonUtils.roundToDigit(individualVolumes[i] * 100, 1) + "% " + TextFormatting.GRAY + "(" + IgblonUtils.roundToDigit(entry.getValue(), 2) + " mol) ");
+                    text.add(TextFormatting.RESET + entry.getKey().getName() + ": " + IgblonUtils.roundToDigit(gaseousMixture.getPercentageOfIndividualChemical(entry.getKey()) * 100, 1) + "% " + TextFormatting.GRAY + "(" + IgblonUtils.roundToDigit(entry.getValue(), 2) + " mol) ");
                     i++;
                 }
             }

@@ -10,9 +10,15 @@ public class Chemical implements Comparable<Chemical> {
     //SOLUBILITIES TAKEN FROM: https://en.wikipedia.org/wiki/Solubility_table
 
     private String name;
-    private double boilingPoint;
-    private double meltingPoint;
+
     private int color = 0xffffff;
+
+    //the temperature required for this chemical's vapor pressure to reach 100,000 Pa
+    //measured in Kelvin
+    private double boilingPoint;
+
+    //measured in Kelvin
+    private double meltingPoint;
 
     //measured in grams/liter
     private double density;
@@ -34,15 +40,12 @@ public class Chemical implements Comparable<Chemical> {
     //pKa will only apply to certain compounds
     private boolean hasPKA = false;
 
-    //measured in Joules/mol
-    private double heatOfVaporization = -1;
-
     //solubilities measured in grams of this chemical/liters of [x] solvent
     private HashMap<Chemical, SolubilityInfo> solubilityInfos = new HashMap<Chemical, SolubilityInfo>();
 
     private HashMap<Chemical, Integer> chemicalFormula = new HashMap<Chemical, Integer>();
 
-    private ArrayList<Chemical> immiscibleWith = new ArrayList<Chemical>();
+    private ArrayList<Chemical> miscibleWith = new ArrayList<Chemical>();
 
     public Chemical(String name) {
         this.name = name;
@@ -60,13 +63,13 @@ public class Chemical implements Comparable<Chemical> {
         return solubilityInfos;
     }
 
-    public Chemical registerImmiscibility(Chemical... chemicals) {
-        immiscibleWith.addAll(Arrays.asList(chemicals));
+    public Chemical registerMiscibility(Chemical... chemicals) {
+        miscibleWith.addAll(Arrays.asList(chemicals));
         return this;
     }
 
-    public ArrayList<Chemical> getImmiscibilities() {
-        return immiscibleWith;
+    public ArrayList<Chemical> getMiscibilities() {
+        return miscibleWith;
     }
 
     public Chemical setHeatCapacity(double heatCapacity) {
@@ -120,6 +123,11 @@ public class Chemical implements Comparable<Chemical> {
         return this;
     }
 
+    //Temperature measured in Kelvins
+
+    public double getBoilingPoint() {return this.boilingPoint; }
+
+    /*
     //Pressure measured in Pascals
     //Temperature measured in Kelvins
     public double getBoilingPoint(double pressure) {
@@ -131,6 +139,8 @@ public class Chemical implements Comparable<Chemical> {
         }
     }
 
+     */
+
     public int getColor() {
         return color;
     }
@@ -138,15 +148,6 @@ public class Chemical implements Comparable<Chemical> {
     public Chemical setColor(int color) {
         this.color = color;
         return this;
-    }
-
-    public Chemical setHeatOfVaporization(double heatOfVaporization) {
-        this.heatOfVaporization = heatOfVaporization;
-        return this;
-    }
-
-    public double getHeatOfVaporization() {
-        return heatOfVaporization;
     }
 
     public Chemical setMolarMass(double molarMass) {
@@ -165,6 +166,15 @@ public class Chemical implements Comparable<Chemical> {
 
     public double getDensity() {
         return this.density;
+    }
+
+    //Equation obtained by trial and error on Desmos and water's vapor pressure graph
+    public double getBPVaporPressure() {
+        return Math.pow(10, (boilingPoint - 123) / 50);
+    }
+
+    public double calculateVaporPressure(double temperature) {
+        return Math.pow(10, (temperature - 123) / 50);
     }
 
     public Chemical setAcidData(double pKa, int hIons, int ohIons) {

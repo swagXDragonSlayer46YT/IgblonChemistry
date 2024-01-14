@@ -130,11 +130,13 @@ public class Chemicals {
     public static Chemical SodiumSulfate;
     public static Chemical HydrogenChloride;
 
+    public static Chemical Methanol;
+    public static Chemical FormicAcid;
+
     public static void register() {
         registerElements();
 
         Water = new Chemical("Water", Hydrogen, 2, Oxygen, 1)
-                .setHeatOfVaporization(40650)
                 .setBoilingPoint(373)
                 .setMeltingPoint(273)
                 .setColor(0x2d6ce0)
@@ -184,6 +186,22 @@ public class Chemicals {
                 .setMolarMass(36.46)
                 .setHeatCapacity(29.58)
                 .setColor(0x95baa4);
+
+        Methanol = new Chemical("Methanol", Carbon, 1, Hydrogen, 4, Oxygen, 1)
+                .setMeltingPoint(175)
+                .setBoilingPoint(337)
+                .setDensity(791)
+                .setMolarMass(32.04)
+                .setHeatCapacity(79.9)
+                .setColor(0x402e0d);
+
+        FormicAcid = new Chemical("Formic Acid", Carbon, 1, Hydrogen, 2, Oxygen, 2)
+                .setMeltingPoint(281)
+                .setBoilingPoint(373)
+                .setDensity(1220)
+                .setMolarMass(46.03)
+                .setHeatCapacity(101.3)
+                .setColor(0xb36d68);
     }
 
     public static void registerElements() {

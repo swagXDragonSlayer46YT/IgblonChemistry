@@ -15,16 +15,18 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 import net.minecraftforge.items.wrapper.CombinedInvWrapper;
+import scala.Console;
 
 import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Random;
 
 public class TileChemicalReactor extends TileEntity implements ITickable {
 
     private double temperature = 293;
 
-    private ArrayList<Mixture> contents = new ArrayList<Mixture>();
+    public ArrayList<Mixture> contents = new ArrayList<Mixture>();
     private GaseousMixture containedGas;
 
     //measured in centimeters
@@ -48,15 +50,18 @@ public class TileChemicalReactor extends TileEntity implements ITickable {
 
         contents.clear();
 
-        /*
         contents.add(new Mixture(this, Chemicals.SulfuricAcid, 2500, 293));
         contents.add(new Mixture(this, Chemicals.SodiumHydroxide, 2500, 293));
-        contents.add(new Mixture(this, Chemicals.Salt, 2500, 293));
-        contents.add(new Mixture(this, Chemicals.SodiumHydroxide, 2500, 293));
-        contents.add(new Mixture(this, Chemicals.SulfuricAcid, 2500, 293));
-        contents.add(new Mixture(this, Chemicals.Water, 2500, 293));
+    }
 
-         */
+    private double CalculateOccupiedVolume() {
+        double total = 0;
+
+        for (Mixture mixture : contents) {
+            total += mixture.getTotalVolume();
+        }
+
+        return total;
     }
 
     @Override
@@ -64,35 +69,98 @@ public class TileChemicalReactor extends TileEntity implements ITickable {
         //Simulate interactions between mixtures
         ArrayList<Mixture> emptyMixtures = new ArrayList<Mixture>();
 
-        double fluidVolumes = 0;
+        Random r = new Random();
+        double simulationSpeed = 10;
+
         for (int h = 0; h < contents.size(); h++) {
-            contents.get(h).update();
-            fluidVolumes += contents.get(h).getTotalVolume();
+            //Combine mixtures if they are both in the same state and the dominant chemical is the same
+            if (h < contents.size() - 1) {
+                if (contents.get(h).getIsMostlySolid() == contents.get(h + 1).getIsMostlySolid()) {
+                    if (contents.get(h).getDominantChemical().compareTo(contents.get(h + 1).getDominantChemical()) == 0) {
+                        contents.get(h).mergeMixture(contents.get(h + 1));
+                        emptyMixtures.add(contents.get(h));
+                        continue;
+                    }
+                }
+            }
+
+            //Skip empty mixtures and keep track of them to be removed later
             if (contents.get(h).isEmpty()) {
                 emptyMixtures.add(contents.get(h));
+                continue;
+            }
+
+            contents.get(h).cleanComponentsList();
+            contents.get(h).calculateColorAverage();
+            contents.get(h).updateVariables();
+
+            //Move mixtures based on densities
+
+            //TODO: Movement is cancelled if ONE of the mixtures is solid AND not porous (will happen if the mixture has experienced a transition from liquid to solid)
+            if (h > 0) {
+                if (!(contents.get(h).getIsMostlySolid() && contents.get(h - 1).getIsMostlySolid())) {
+                    if (contents.get(h).getAverageDensity() > contents.get(h - 1).getAverageDensity()) {
+                        contents.get(h - 1).moveMixture(contents.get(h), simulationSpeed + r.nextDouble() * simulationSpeed);
+                    } else {
+                        contents.get(h - 1).moveMixture(contents.get(h), (simulationSpeed + r.nextDouble() * simulationSpeed) / 10);
+                    }
+                }
+            }
+
+            if (h < contents.size() - 1) {
+                if (!(contents.get(h).getIsMostlySolid() && contents.get(h + 1).getIsMostlySolid())) {
+                    if (contents.get(h).getAverageDensity() < contents.get(h + 1).getAverageDensity()) {
+                        contents.get(h + 1).moveMixture(contents.get(h), simulationSpeed + r.nextDouble() * simulationSpeed);
+                    } else {
+                        contents.get(h + 1).moveMixture(contents.get(h), (simulationSpeed + r.nextDouble() * simulationSpeed) / 10);
+                    }
+                }
+            }
+
+            contents.get(h).runPossibleReactions();
+
+            if (h > 0 && h < contents.size() - 1) {
+                contents.get(h).doSeparations(contents.get(h - 1), contents.get(h + 1), simulationSpeed);
+            } else if (h > 0) {
+                contents.get(h).doSeparations(contents.get(h - 1), null, simulationSpeed);
+            } else if (h < contents.size() - 1) {
+                contents.get(h).doSeparations(null, contents.get(h + 1), simulationSpeed);
+            } else {
+                contents.get(h).doSeparations(null, null, simulationSpeed);
             }
         }
 
-        for (int i = 0; i < contents.size() - 1; i++) {
-            Mixture currentMix = contents.get(i);
-            Mixture aboveMix = contents.get(i + 1);
+        //Simulate evaporation
+        if (contents.size() > 0) {
+            Mixture topMixture = contents.get(contents.size() - 1);
+            for (Map.Entry<Chemical, Double> entrySet : topMixture.getComponents().entrySet()) {
+                //Solid components cannot evaporate
+                if (topMixture.getTemperature() < entrySet.getKey().getMeltingPoint()) {
+                    continue;
+                }
 
-            //Consume a higher % of the above mixture as it gets smaller
-            //TODO: FOLLOWING INTERACTIONS:
-            /*
-                LIQUID-LIQUID: IF LIQUIDS ARE IMMISCIBLE, SORT BY DENSITY, OTHERWISE MIX
-                LIQUID-SOLID: IF SOLID IS INSOLUBLE SORT BY DENSITY, IF SOLID IS SOLUBLE, DISSOLVE UNTIL LIMIT AND THEN SORT BY DENSITY
-                LIQUID-GAS: TOP FLUID WILL ABSORB SOLUBLE GASES FROM THE CONTAINED GASES
-                SOLID-SOLID: NO INTERACTION UNLESS REACTOR IS MIXING
-             */
-            currentMix.moveMixture(aboveMix, Math.min(1.0, 1.0 / (aboveMix.getTotalVolume() + 1.0)));
 
-            //TODO: DETERMINE WHETHER THE BOTTOM OR TOP MIXTURE IS HOTTER, AND MOVE JOULES IN THAT DIRECTION
+            }
         }
 
-        occupiedVolume = fluidVolumes;
+        occupiedVolume = CalculateOccupiedVolume();
 
-        containedGas.update();
+        containedGas.cleanComponentsList();
+        containedGas.calculateColorAverage();
+        containedGas.updateVariables();
+
+        //Simulate condensation
+
+        //TODO FIX EVAPORATIONS
+        /*
+        if (contents.size() > 0) {
+            if (!contents.get(contents.size() - 1).getIsMostlySolid()) {
+                containedGas.moveMixture(contents.get(contents.size() - 1), 1 + r.nextDouble());
+            }
+        }
+        */
+
+        containedGas.runPossibleReactions();
 
         //TODO: Sealed chemical reactors will not leak
         simulatePressureLeakage();

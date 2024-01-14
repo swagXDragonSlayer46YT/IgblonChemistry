@@ -17,38 +17,6 @@ public class GaseousMixture extends Mixture {
         super(chemicalReactor, chemical, amount, temperature);
     }
 
-    @Override
-    public void update() {
-        cleanComponentsList();
-
-        checkIfVacuum();
-
-        containedChemicals = new ArrayList<>(components.keySet());
-
-        updateVariables();
-
-        calculateTotalVolume();
-
-        calculateTotalPressures();
-
-        runPossibleReactions();
-    }
-
-    @Override
-    public void updateVariables() {
-        double totalHeatCapacity = 0;
-        double totalMoles = 0;
-
-        for (Map.Entry<Chemical, Double> entry : components.entrySet()) {
-            totalHeatCapacity += entry.getKey().getHeatCapacity() * entry.getValue();
-            totalMoles += entry.getValue();
-        }
-
-        setTotalMols(totalMoles);
-        setAverageHeatCapacity(totalHeatCapacity / totalMoles);
-        setTemperature((getEnergyContained() / getAverageHeatCapacity()) / totalMoles);
-    }
-
     //Rather than removing itself when empty, it will simply be a vacuum
     @Override
     public boolean isEmpty() {
@@ -67,24 +35,18 @@ public class GaseousMixture extends Mixture {
         return isVacuum;
     }
 
-    //Returns a list of percentages of gases by volume
-    @Override
-    public double[] getIndividualVolumes() {
-        double[] volumes = new double[components.size()];
-        int i = 0;
-
-        for (Map.Entry<Chemical, Double> entry : components.entrySet()) {
-            volumes[i] = entry.getValue() / getTotalMols();
-            i++;
-        }
-
-        return volumes;
-    }
-
     //Gases will expand to occupy leftover space
     @Override
-    public void calculateTotalVolume() {
-        setTotalVolume(chemicalReactor.getReactorVolume() - chemicalReactor.getOccupiedVolume());
+    public void updateVariables() {
+        super.updateVariables();
+
+        if (chemicalReactor != null) {
+            totalVolume = chemicalReactor.getReactorVolume() - chemicalReactor.getOccupiedVolume();
+        }
+    }
+
+    public double getPercentageOfIndividualChemical(Chemical chemical) {
+        return (components.get(chemical) * chemical.getMolarMass() / chemical.getDensity()) / totalVolume;
     }
 
     public double[] getIndividualPressures() {

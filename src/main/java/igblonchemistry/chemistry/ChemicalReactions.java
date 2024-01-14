@@ -6,17 +6,17 @@ public class ChemicalReactions {
 
     public static ArrayList<ChemicalReaction> chemicalReactions = new ArrayList<ChemicalReaction>();
 
-    //Register immiscibility between a chemical and other chemicals
-    public static void registerImmiscibility(Chemical chemical, Chemical... chemicals) {
-        chemical.registerImmiscibility(chemicals);
+    //Register miscibility between a chemical and other chemicals
+    public static void registerMiscibility(Chemical chemical, Chemical... chemicals) {
+        chemical.registerMiscibility(chemicals);
 
         for (Chemical c : chemicals) {
-            c.registerImmiscibility(chemical);
+            c.registerMiscibility(chemical);
         }
     }
 
     public static void register() {
-        //TODO: REGISTER IMMISCIBILITY BETWEEN WATER AND OIL AS AN EXAMPLE
+        registerMiscibility(Chemicals.Water, Chemicals.FormicAcid, Chemicals.SulfuricAcid);
 
         new ChemicalReaction()
                 .addReactant(Chemicals.SodiumHydroxide, 2)

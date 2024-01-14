@@ -3,18 +3,13 @@ package igblonchemistry.chemistry;
 import igblonchemistry.IgblonChemistry;
 import igblonchemistry.client.renderer.RenderingUtils;
 import igblonchemistry.common.blocks.TileChemicalReactor;
+import scala.Console;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 public class Mixture {
-
     //Compound & amount of moles
     protected HashMap<Chemical, Double> components = new HashMap<Chemical, Double>();
-
-    protected ArrayList<Chemical> containedChemicals = new ArrayList<Chemical>();
 
     //In Kelvin
     private double temperature;
@@ -22,47 +17,36 @@ public class Mixture {
     //In Joules
     private double energyContained;
 
-    private boolean hasPH;
     private double pH = 0;
-    private double averageHeatCapacity;
 
-    private double totalVolume;
+    private double porosity = 0.1;
+
+    private double averageHeatCapacity;
+    private double averageDensity;
+
+    protected double totalVolume;
+    private double totalMass;
     private double totalMols;
-    private boolean isAqueous;
 
     private int color;
 
     public TileChemicalReactor chemicalReactor;
 
+    private Chemical dominantChemical;
+    private boolean isMostlySolid;
+    private boolean isPorous = true;
+
     public Mixture(TileChemicalReactor chemicalReactor, Chemical chemical, double amount, double temperature) {
+        this.chemicalReactor = chemicalReactor;
+
+        amount = Math.max(amount, 1);
+
         components.put(chemical, amount);
+
         averageHeatCapacity = chemical.getHeatCapacity();
         energyContained = averageHeatCapacity * temperature * amount;
-        this.temperature = temperature;
-        this.chemicalReactor = chemicalReactor;
-    }
-
-    //Simulate chemical reactions within the mixture, between the chemicals in the chemical list
-    public void update() {
-        cleanComponentsList();
-
-        calculateColorAverage();
-
-        containedChemicals = new ArrayList<>(components.keySet());
 
         updateVariables();
-
-        calculatePH();
-
-        calculateTotalVolume();
-
-        runPossibleReactions();
-
-        precipitateSolids();
-    }
-
-    public void precipitateSolids() {
-
     }
 
     //Delete itself if mixture is empty
@@ -123,7 +107,7 @@ public class Mixture {
         //Check if this mixture contains each chemical needed in the reaction, return false if any single required chemical is not found (reaction impossible)
         for (Chemical reactant : reactantsNeeded) {
             boolean reactantFound = false;
-            for (Chemical chemical : containedChemicals) {
+            for (Chemical chemical : components.keySet()) {
                 if (chemical.compareTo(reactant) == 0) {
                     reactantFound = true;
                     break;
@@ -140,22 +124,39 @@ public class Mixture {
 
     //Update all variables in one function
     public void updateVariables() {
-        isAqueous = false;
-        double totalHeatCapacity = 0;
-        double totalMoles = 0;
+        double _totalHeatCapacity = 0;
+        double _totalMols = 0;
+        double _totalVolume = 0;
+        double _totalMass = 0;
 
         for (Map.Entry<Chemical, Double> entry : components.entrySet()) {
-            if (entry.getKey().compareTo(Chemicals.Water) == 0) {
-                isAqueous = true;
-            }
-
-            totalHeatCapacity += entry.getKey().getHeatCapacity() * entry.getValue();
-            totalMoles += entry.getValue();
+            _totalHeatCapacity += entry.getKey().getHeatCapacity() * entry.getValue();
+            _totalMols += entry.getValue();
+            _totalVolume += entry.getValue() * entry.getKey().getMolarMass() / entry.getKey().getDensity();
+            _totalMass += entry.getValue() * entry.getKey().getMolarMass();
         }
 
-        totalMols = totalMoles;
-        averageHeatCapacity = totalHeatCapacity / totalMoles;
-        temperature = (energyContained / averageHeatCapacity) / totalMols;
+        //Prevent divide by 0 errors
+        if (_totalMols > 0.0001 && _totalVolume > 0.0001) {
+            totalVolume = _totalVolume;
+            totalMols = _totalMols;
+            averageHeatCapacity = _totalHeatCapacity / _totalMols;
+            averageDensity = _totalMass / _totalVolume;
+            totalMass = _totalMass;
+            temperature = (energyContained / averageHeatCapacity) / _totalMols;
+
+            if (components.size() > 1) {
+                dominantChemical = Collections.max(components.entrySet(), Map.Entry.comparingByValue()).getKey();
+            } else {
+                dominantChemical = components.entrySet().stream().findFirst().get().getKey();
+            }
+
+            if (temperature > dominantChemical.getMeltingPoint()) {
+                isMostlySolid = false;
+            } else {
+                isMostlySolid = true;
+            }
+        }
     }
 
     public double findChemical(Chemical chemical) {
@@ -163,25 +164,6 @@ public class Mixture {
             return components.get(chemical);
         }
         return 0;
-    }
-
-    public double findSolubilityLimit(Chemical chemical) {
-        //Finds the total amount of chemical that can be held in this mixture
-        HashMap<Chemical, SolubilityInfo> solubilityInfos = chemical.getSolubilityInfos();
-
-        if (solubilityInfos.isEmpty()) {
-            return 0;
-        } else {
-            double solubilityTotal = 0;
-            for (Map.Entry<Chemical, SolubilityInfo> entry : solubilityInfos.entrySet()) {
-                for (Map.Entry<Chemical, Double> entry2 : components.entrySet()) {
-                    if (entry.getKey().compareTo(entry2.getKey()) == 0) {
-                        solubilityTotal += entry.getValue().calculateSolubility(temperature) * entry2.getValue();
-                    }
-                }
-            }
-            return solubilityTotal;
-        }
     }
 
     public void addChemical(Chemical chemical, double amount, double temperature) {
@@ -195,16 +177,22 @@ public class Mixture {
         }
 
         this.components.put(chemical, amount);
+
+        updateVariables();
     }
 
     public boolean removeChemical(Chemical chemical, double amount) {
         for (Map.Entry<Chemical, Double> entry : components.entrySet()) {
             if (entry.getKey().compareTo(chemical) == 0) {
-                entry.setValue(Math.max(entry.getValue() - amount, 0));
-                energyContained -= amount * temperature * chemical.getHeatCapacity();
+                double constraintedAmount = Math.min(amount, entry.getValue());
+
+                entry.setValue(entry.getValue() - constraintedAmount);
+                energyContained -= constraintedAmount * temperature * chemical.getHeatCapacity();
                 return true;
             }
         }
+
+        updateVariables();
 
         return false;
     }
@@ -213,23 +201,142 @@ public class Mixture {
     public boolean moveChemical(Mixture mixtureFrom, Chemical chemicalToMove, double amount) {
         if (mixtureFrom.removeChemical(chemicalToMove, amount)) {
             addChemical(chemicalToMove, amount, mixtureFrom.getTemperature());
+            mixtureFrom.updateVariables();
             return true;
         }
+
+        updateVariables();
 
         return false;
     }
 
-    //moves all chemicals from a mixture, proportionally
-    public Mixture moveMixture(Mixture mixtureFrom, double percentage) {
-        //IgblonChemistry.logger.warn(percentage);
-        for (Map.Entry<Chemical, Double> entry : mixtureFrom.getComponents().entrySet()) {
-            if (entry.getValue() * percentage > 0.01) {
-                moveChemical(mixtureFrom, entry.getKey(), entry.getValue() * percentage);
+    public void doSeparations(Mixture mixtureBelow, Mixture mixtureAbove, double separationSpeed) {
+
+        Random r = new Random();
+
+        //This mixture is solid, so everything is trapped in it
+        if (!isPorous) {
+            return;
+        }
+
+        //This mixture only has 1 component, so it doesnt have to separate anything out
+        if (components.size() < 2) {
+            return;
+        }
+
+        double totalFluidVolume = 0;
+
+        for (Map.Entry<Chemical, Double> entry : components.entrySet()) {
+            //the dominant chemical does not move from its own mixture
+            if (entry.getKey().compareTo(dominantChemical) == 0) {
+                continue;
+            }
+
+            //calculate the max amount a certain chemical can stay in this mixture
+            double maxAmount = 0;
+
+            if (isMostlySolid) {
+                if (temperature > entry.getKey().getBoilingPoint()) {
+                    //This chemical is gaseous in this porous mixture, so it rises up
+                    if (mixtureAbove != null) {
+                        mixtureAbove.moveChemical(this, entry.getKey(), Math.min(entry.getValue(), separationSpeed));
+                    } else {
+                        chemicalReactor.getContainedGas().moveChemical(this, entry.getKey(), Math.min(entry.getValue(), separationSpeed));
+                    }
+
+                    continue;
+
+                } else if (temperature > entry.getKey().getMeltingPoint()) {
+                    //This chemical is fluid in this porous mixture, so the max amount is whatever room is left
+                    maxAmount = (totalVolume * porosity - totalFluidVolume) * entry.getKey().getDensity() / entry.getKey().getMolarMass();
+
+                    totalFluidVolume += getVolumeOfIndividualChemical(entry.getKey());
+
+                } else {
+                    //This chemical is solid in this porous mixture, so it can't move
+                    maxAmount = Double.MAX_VALUE;
+                }
             } else {
-                moveChemical(mixtureFrom, entry.getKey(), entry.getValue());
+                //Find if this chemical is miscible or soluble in this fluid mixture
+                boolean isMiscible = false;
+
+                for (Chemical miscibleChemical : entry.getKey().getMiscibilities()) {
+                    if (dominantChemical != null) {
+                        if (miscibleChemical.compareTo(dominantChemical) == 0) {
+                            isMiscible = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (isMiscible) {
+                    maxAmount = Double.MAX_VALUE;
+                } else {
+                    HashMap<Chemical, SolubilityInfo> solubilityInfos = entry.getKey().getSolubilityInfos();
+
+                    if (solubilityInfos.isEmpty()) {
+                        maxAmount = 0;
+                    } else {
+                        double solubilityTotal = 0;
+
+                        for (Map.Entry<Chemical, SolubilityInfo> entry2 : solubilityInfos.entrySet()) {
+                            for (Map.Entry<Chemical, Double> entry3 : components.entrySet()) {
+                                if (entry3.getKey().compareTo(entry2.getKey()) == 0 && entry.getKey().compareTo(entry2.getKey()) != 0) {
+                                    solubilityTotal += entry2.getValue().calculateSolubility(temperature) * getVolumeOfIndividualChemical(entry3.getKey()) / entry.getKey().getMolarMass();
+                                }
+                            }
+                        }
+
+                        maxAmount = solubilityTotal;
+                    }
+                }
+            }
+
+            //get rid of the chemical if necessary
+            if (entry.getValue() > maxAmount) {
+                double amountToMove = Math.min(Math.min(separationSpeed, entry.getValue()), entry.getValue() - maxAmount + r.nextDouble());
+
+                if (entry.getKey().getDensity() > averageDensity) {
+                    if (mixtureBelow != null) {
+                        mixtureBelow.moveChemical(this, entry.getKey(), amountToMove);
+                    } else {
+                        chemicalReactor.contents.add(0, (new Mixture(chemicalReactor, entry.getKey(), amountToMove, temperature)));
+                    }
+                } else {
+                    if (mixtureAbove != null) {
+                        mixtureAbove.moveChemical(this, entry.getKey(), amountToMove);
+                    } else {
+                        chemicalReactor.contents.add(chemicalReactor.contents.size(), (new Mixture(chemicalReactor, entry.getKey(), amountToMove, temperature)));
+                    }
+                }
             }
         }
+
+        updateVariables();
+    }
+
+    //moves all chemicals from a mixture, proportionally
+    public Mixture moveMixture(Mixture mixtureFrom, double amount) {
+        for (Map.Entry<Chemical, Double> entry : mixtureFrom.getComponents().entrySet()) {
+            double proportion = mixtureFrom.getVolumeOfIndividualChemical(entry.getKey()) / mixtureFrom.getTotalVolume();
+            mixtureFrom.updateVariables();
+
+            moveChemical(mixtureFrom, entry.getKey(), amount * proportion);
+        }
+
+        updateVariables();
+
         return this;
+    }
+
+    public void mergeMixture(Mixture mixtureTo) {
+        for (Map.Entry<Chemical, Double> entry : components.entrySet()) {
+            mixtureTo.moveChemical(this, entry.getKey(), entry.getValue());
+        }
+
+        mixtureTo.updateVariables();
+
+        components.clear();
     }
 
     public HashMap<Chemical, Double> getComponents() {
@@ -265,16 +372,8 @@ public class Mixture {
         return color;
     }
 
-    public double[] getIndividualVolumes() {
-        double[] volumes = new double[components.size()];
-        int i = 0;
-
-        for (Map.Entry<Chemical, Double> entry : components.entrySet()) {
-            volumes[i] = entry.getValue() * entry.getKey().getMolarMass() / entry.getKey().getDensity();
-            i++;
-        }
-
-        return volumes;
+    public double getVolumeOfIndividualChemical(Chemical chemical) {
+        return components.get(chemical) * chemical.getMolarMass() / chemical.getDensity();
     }
 
     //Measured in Liters
@@ -282,23 +381,16 @@ public class Mixture {
         return totalVolume;
     }
 
-    public void setTotalVolume(double totalVolume) {
-        this.totalVolume = totalVolume;
-    }
-
     public double getEnergyContained() {
         return energyContained;
     }
 
-    public void calculateTotalVolume() {
-        double[] volumes = getIndividualVolumes();
-        double tVolume = 0;
+    public Chemical getDominantChemical() {
+        return dominantChemical;
+    }
 
-        for (double a : volumes) {
-            tVolume += a;
-        }
-
-        totalVolume = tVolume;
+    public boolean getIsMostlySolid() {
+        return isMostlySolid;
     }
 
     //Measured in Kelvin
@@ -306,6 +398,7 @@ public class Mixture {
         return temperature;
     }
 
+    /*
     public void calculatePH() {
         if (!isAqueous) {
             hasPH = false;
@@ -354,13 +447,9 @@ public class Mixture {
         return pH;
     }
 
-    public boolean getHasPH() {
-        return hasPH;
-    }
+     */
 
-    public boolean getIsAqueous() {
-        return isAqueous;
-    }
+
 
     public double getTotalMols() {
         return totalMols;
@@ -379,12 +468,8 @@ public class Mixture {
         return averageHeatCapacity;
     }
 
-    public void setTotalMols(double totalMols) {
-        this.totalMols = totalMols;
-    }
-
-    public void setAverageHeatCapacity(double averageHeatCapacity) {
-        this.averageHeatCapacity = averageHeatCapacity;
+    public double getAverageDensity() {
+        return averageDensity;
     }
 
     public void setTemperature(double temperature) {
