@@ -2,9 +2,12 @@ package igblonchemistry.chemistry;
 
 import igblonchemistry.common.ChemistryConstants;
 import igblonchemistry.common.blocks.TileChemicalReactor;
+import scala.Console;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 public class GaseousMixture extends Mixture {
 
@@ -42,23 +45,9 @@ public class GaseousMixture extends Mixture {
 
         if (chemicalReactor != null) {
             totalVolume = chemicalReactor.getReactorVolume() - chemicalReactor.getOccupiedVolume();
+
+            pressure = (totalMols * ChemistryConstants.GAS_CONSTANT * temperature) / totalVolume;
         }
-    }
-
-    public double getPercentageOfIndividualChemical(Chemical chemical) {
-        return (components.get(chemical) * chemical.getMolarMass() / chemical.getDensity()) / totalVolume;
-    }
-
-    public double[] getIndividualPressures() {
-        double[] pressures = new double[components.size()];
-        int i = 0;
-
-        for (Map.Entry<Chemical, Double> entry : components.entrySet()) {
-            pressures[i] = (entry.getValue() * ChemistryConstants.GAS_CONSTANT * getTemperature()) / getTotalVolume();
-            i++;
-        }
-
-        return pressures;
     }
 
     //Measured in Pascals
@@ -66,14 +55,39 @@ public class GaseousMixture extends Mixture {
         return pressure;
     }
 
-    public void calculateTotalPressures() {
-        double[] pressures = getIndividualPressures();
-        double tPressure = 0;
+    public double getPressureOfIndividualChemical(Chemical chemical) {
+        return (components.get(chemical) * ChemistryConstants.GAS_CONSTANT * temperature) / totalVolume;
+    }
 
-        for (double a : pressures) {
-            tPressure += a;
+    public void doGaseousSeparations(Mixture mixtureBelow, double separationSpeed) {
+        Random r = new Random();
+
+        for (Map.Entry<Chemical, Double> entry : components.entrySet()) {
+            //Simulate absorption
+
+            HashMap<Chemical, SolubilityInfo> solubilityInfos = entry.getKey().getSolubilityInfos();
+
+            if (!solubilityInfos.isEmpty()) {
+                double solubilityTotal = 0;
+
+                for (Map.Entry<Chemical, SolubilityInfo> entry2 : solubilityInfos.entrySet()) {
+                    for (Map.Entry<Chemical, Double> entry3 : mixtureBelow.getComponents().entrySet()) {
+                        if (entry3.getKey().compareTo(entry2.getKey()) == 0 && entry.getKey().compareTo(entry2.getKey()) != 0) {
+                            solubilityTotal += entry2.getValue().calculateSolubility(temperature) * getVolumeOfIndividualChemical(entry3.getKey()) / entry.getKey().getMolarMass();
+                        }
+                    }
+                }
+
+                if (solubilityTotal > 0) {
+                    mixtureBelow.moveChemical(this, entry.getKey(), Math.min(entry.getValue(), separationSpeed + r.nextDouble()));
+                }
+            }
+
+            if (entry.getKey().calculateVaporPressure(temperature) < pressure) {
+                mixtureBelow.moveChemical(this, entry.getKey(), Math.min(entry.getValue(), separationSpeed + r.nextDouble()));
+            }
         }
 
-        pressure = tPressure;
+        updateVariables();
     }
 }

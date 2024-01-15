@@ -15,7 +15,6 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 import net.minecraftforge.items.wrapper.CombinedInvWrapper;
-import scala.Console;
 
 import java.sql.Time;
 import java.util.ArrayList;
@@ -49,6 +48,14 @@ public class TileChemicalReactor extends TileEntity implements ITickable {
         containedGas.addChemical(Chemicals.Nitrogen, 2000, 293);
 
         contents.clear();
+
+        /*
+        Mixture test = new Mixture(this, Chemicals.SulfuricAcid, 1000, 293);
+        test.addChemical(Chemicals.SodiumHydroxide, 2000, 293);
+
+        contents.add(test);
+
+         */
 
         contents.add(new Mixture(this, Chemicals.SulfuricAcid, 2500, 293));
         contents.add(new Mixture(this, Chemicals.SodiumHydroxide, 2500, 293));
@@ -131,6 +138,8 @@ public class TileChemicalReactor extends TileEntity implements ITickable {
         }
 
         //Simulate evaporation
+
+        /*
         if (contents.size() > 0) {
             Mixture topMixture = contents.get(contents.size() - 1);
             for (Map.Entry<Chemical, Double> entrySet : topMixture.getComponents().entrySet()) {
@@ -139,9 +148,17 @@ public class TileChemicalReactor extends TileEntity implements ITickable {
                     continue;
                 }
 
+                double boilingSpeed = Math.pow(10, (entrySet.getKey().calculateVaporPressure(topMixture.getTemperature()) - containedGas.getPressure()) / 100000 + 1);
 
+                if (boilingSpeed > 0.1) {
+                    boilingSpeed = Math.min(boilingSpeed, 10);
+
+                    containedGas.moveChemical(topMixture, entrySet.getKey(), boilingSpeed + r.nextDouble());
+                }
             }
         }
+
+         */
 
         occupiedVolume = CalculateOccupiedVolume();
 
@@ -149,22 +166,19 @@ public class TileChemicalReactor extends TileEntity implements ITickable {
         containedGas.calculateColorAverage();
         containedGas.updateVariables();
 
-        //Simulate condensation
-
-        //TODO FIX EVAPORATIONS
-        /*
-        if (contents.size() > 0) {
-            if (!contents.get(contents.size() - 1).getIsMostlySolid()) {
-                containedGas.moveMixture(contents.get(contents.size() - 1), 1 + r.nextDouble());
-            }
-        }
-        */
-
         containedGas.runPossibleReactions();
 
         //TODO: Sealed chemical reactors will not leak
         simulatePressureLeakage();
         simulateThermalLeakage();
+
+        /*
+        if (contents.size() > 0) {
+            containedGas.doGaseousSeparations(contents.get(contents.size() - 1), simulationSpeed);
+        } else {
+        }
+
+         */
 
         for (Mixture emptyMixture : emptyMixtures) {
             contents.remove(emptyMixture);

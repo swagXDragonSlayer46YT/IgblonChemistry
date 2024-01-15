@@ -211,7 +211,7 @@ public class GuiChemicalReactor extends GuiContainer {
                 int i = 0;
 
                 for (Map.Entry<Chemical, Double> entry : components.entrySet()) {
-                    text.add(TextFormatting.RESET + entry.getKey().getName() + ": " + IgblonUtils.roundToDigit(gaseousMixture.getPercentageOfIndividualChemical(entry.getKey()) * 100, 1) + "% " + TextFormatting.GRAY + "(" + IgblonUtils.roundToDigit(entry.getValue(), 2) + " mol) ");
+                    text.add(TextFormatting.RESET + entry.getKey().getName() + ": " + IgblonUtils.roundToDigit(gaseousMixture.getPressureOfIndividualChemical(entry.getKey()) / gaseousMixture.getPressure() * 100, 1) + "% " + TextFormatting.GRAY + "(" + IgblonUtils.roundToDigit(entry.getValue(), 2) + " mol) ");
                     i++;
                 }
             }

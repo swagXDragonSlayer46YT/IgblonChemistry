@@ -137,8 +137,8 @@ public class Chemicals {
         registerElements();
 
         Water = new Chemical("Water", Hydrogen, 2, Oxygen, 1)
-                .setBoilingPoint(373)
                 .setMeltingPoint(273)
+                .setBoilingPoint(373)
                 .setColor(0x2d6ce0)
                 .setDensity(1000)
                 .setMolarMass(18.01)
@@ -156,6 +156,7 @@ public class Chemicals {
         SulfuricAcid = new Chemical("Sulfuric Acid", Hydrogen, 2, Sulfur, 1, Oxygen, 4)
                 .addSolubilityInfo(Water, temperature -> 356.5 + 0.0035 * Math.pow(temperature - 273, 2))
                 .setMeltingPoint(283)
+                .setBoilingPoint(610)
                 .setDensity(1840)
                 .setMolarMass(98.08)
                 .setColor(0xe0721d)
@@ -165,6 +166,7 @@ public class Chemicals {
         SodiumHydroxide = new Chemical("Sodium Hydroxide", Sodium, 1, Oxygen, 1, Hydrogen, 1)
                 .addSolubilityInfo(Water, temperature -> 970 + 0.2 * Math.pow(temperature - 273, 2))
                 .setMeltingPoint(591)
+                .setMeltingPoint(1661)
                 .setDensity(2130)
                 .setMolarMass(40)
                 .setColor(0x1f185c)
@@ -174,6 +176,7 @@ public class Chemicals {
         SodiumSulfate = new Chemical("Sodium Sulfate", Sodium, 2, Sulfur, 1, Oxygen, 4)
                 .addSolubilityInfo(Water, temperature -> temperature < 308 ? 49 + 0.4 * Math.pow(temperature - 273, 2) : 539 - 2 * (temperature - 308))
                 .setMeltingPoint(1157)
+                .setMeltingPoint(1702)
                 .setDensity(2660)
                 .setMolarMass(142)
                 .setHeatCapacity(128.2)

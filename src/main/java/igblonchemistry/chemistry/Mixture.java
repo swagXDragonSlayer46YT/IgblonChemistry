@@ -12,7 +12,7 @@ public class Mixture {
     protected HashMap<Chemical, Double> components = new HashMap<Chemical, Double>();
 
     //In Kelvin
-    private double temperature;
+    protected double temperature;
 
     //In Joules
     private double energyContained;
@@ -26,7 +26,7 @@ public class Mixture {
 
     protected double totalVolume;
     private double totalMass;
-    private double totalMols;
+    protected double totalMols;
 
     private int color;
 
@@ -144,12 +144,7 @@ public class Mixture {
             averageDensity = _totalMass / _totalVolume;
             totalMass = _totalMass;
             temperature = (energyContained / averageHeatCapacity) / _totalMols;
-
-            if (components.size() > 1) {
-                dominantChemical = Collections.max(components.entrySet(), Map.Entry.comparingByValue()).getKey();
-            } else {
-                dominantChemical = components.entrySet().stream().findFirst().get().getKey();
-            }
+            dominantChemical = Collections.max(components.entrySet(), Map.Entry.comparingByValue()).getKey();
 
             if (temperature > dominantChemical.getMeltingPoint()) {
                 isMostlySolid = false;
@@ -198,20 +193,29 @@ public class Mixture {
     }
 
     //moves a specific chemical from a mixture
-    public boolean moveChemical(Mixture mixtureFrom, Chemical chemicalToMove, double amount) {
-        if (mixtureFrom.removeChemical(chemicalToMove, amount)) {
-            addChemical(chemicalToMove, amount, mixtureFrom.getTemperature());
-            mixtureFrom.updateVariables();
-            return true;
+    public void moveChemical(Mixture mixtureFrom, Chemical chemicalToMove, double amount) {
+        double constrainedAmount = 0;
+
+        for (Map.Entry<Chemical, Double> entry : mixtureFrom.getComponents().entrySet()) {
+            if (entry.getKey().compareTo(chemicalToMove) == 0) {
+                constrainedAmount = Math.min(amount, entry.getValue());
+
+                entry.setValue(entry.getValue() - constrainedAmount);
+
+                mixtureFrom.energyContained -= constrainedAmount * mixtureFrom.getTemperature() * chemicalToMove.getHeatCapacity();
+
+                mixtureFrom.updateVariables();
+
+                break;
+            }
         }
 
-        updateVariables();
+        addChemical(chemicalToMove, constrainedAmount, mixtureFrom.getTemperature());
 
-        return false;
+        updateVariables();
     }
 
     public void doSeparations(Mixture mixtureBelow, Mixture mixtureAbove, double separationSpeed) {
-
         Random r = new Random();
 
         //This mixture is solid, so everything is trapped in it
